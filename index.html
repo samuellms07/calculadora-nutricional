@@ -363,29 +363,16 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
         </select>
       </div>
       <div class="field" style="grid-column:1/-1">
-        <label><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg>Quais modalidades você pratica?</label>
-        <p class="hint">Selecione todas as modalidades realizadas. É possível informar os dados de cada uma separadamente.</p>
+        <label><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg>Quais tipos de exercício você pratica?</label>
+        <p class="hint">Marque uma ou as duas opções. Se praticar, informe frequência, duração e intensidade.</p>
         <div id="exerciseOptions" class="options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px">
-          <label class="check-option"><input type="checkbox" name="exercise" value="Musculação"> Musculação</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Corrida"> Corrida</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Caminhada"> Caminhada</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Ciclismo"> Ciclismo</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Natação"> Natação</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Futebol"> Futebol</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Vôlei"> Vôlei</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Basquete"> Basquete</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="CrossFit"> CrossFit</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Treinamento funcional"> Treinamento funcional</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Lutas"> Lutas</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Dança"> Dança</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Pilates"> Pilates</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Yoga"> Yoga</label>
-          <label class="check-option"><input type="checkbox" name="exercise" value="Outra atividade"> Outra atividade</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Musculação"> Musculação / treinamento de força</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Cardio"> Exercício cardiovascular (cardio)</label>
         </div>
         <div id="exerciseDetails" class="grid" style="margin-top:14px"></div>
       </div>
     </div>
-    <p class="hint">O fator de atividade continua sendo selecionado pelo profissional. As modalidades, frequência, duração e intensidade registradas servem para contextualizar essa escolha e não são somadas novamente ao GET.</p>
+    <p class="hint">O fator de atividade continua sendo selecionado pelo profissional. Os dados de musculação e cardio ajudam a contextualizar essa escolha; não são somados novamente ao GET.</p>
   </section>
 
   <section class="panel">
@@ -564,17 +551,19 @@ document.querySelectorAll('input[name="formula"]').forEach(el => el.addEventList
   if (el && el.tagName === "INPUT") el.addEventListener("input", updateFormulaSuggestion);
 });
 
-const exerciseNames = ["Musculação", "Corrida", "Caminhada", "Ciclismo", "Natação", "Futebol", "Vôlei", "Basquete", "CrossFit", "Treinamento funcional", "Lutas", "Dança", "Pilates", "Yoga", "Outra atividade"];
+const exerciseNames = ["Musculação", "Cardio"];
 function renderExerciseDetails() {
   const selectedExercises = [...document.querySelectorAll('input[name="exercise"]:checked')].map(el => el.value);
   const container = $("exerciseDetails");
   container.replaceChildren();
+
   selectedExercises.forEach((name, index) => {
     const card = document.createElement("div");
     card.className = "exercise-card";
     const heading = document.createElement("h3");
-    heading.textContent = name;
+    heading.textContent = name === "Cardio" ? "Exercício cardiovascular (cardio)" : "Musculação / treinamento de força";
     card.append(heading);
+
     const grid = document.createElement("div");
     grid.className = "grid";
     const fields = [
@@ -582,6 +571,16 @@ function renderExerciseDetails() {
       { suffix: "minutes", label: "Duração média por sessão (minutos)", type: "number", placeholder: "Ex.: 60" },
       { suffix: "intensity", label: "Intensidade", type: "select", options: ["Leve", "Moderada", "Intensa"] }
     ];
+
+    if (name === "Cardio") {
+      fields.unshift({
+        suffix: "modality",
+        label: "Modalidade principal",
+        type: "select",
+        options: ["Caminhada", "Corrida", "Ciclismo", "Natação", "Elíptico", "Remo", "Dança", "Esporte coletivo", "Outra"]
+      });
+    }
+
     fields.forEach(field => {
       const wrapper = document.createElement("div");
       wrapper.className = "field";
@@ -590,6 +589,7 @@ function renderExerciseDetails() {
       label.htmlFor = id;
       label.textContent = field.label;
       let input;
+
       if (field.type === "select") {
         input = document.createElement("select");
         const blank = document.createElement("option");
@@ -610,17 +610,20 @@ function renderExerciseDetails() {
         input.step = "1";
         input.placeholder = field.placeholder;
       }
+
       input.id = id;
       input.dataset.exercise = name;
       input.dataset.detail = field.suffix;
       wrapper.append(label, input);
       grid.append(wrapper);
     });
+
     card.append(grid);
     container.append(card);
   });
 }
 document.querySelectorAll('input[name="exercise"]').forEach(el => el.addEventListener("change", renderExerciseDetails));
+
 function updateFormulaSuggestion() {
   const age = numberValue("age"), weight = numberValue("weight"), height = numberValue("height");
   const sex = $("sex").value;
@@ -839,11 +842,18 @@ form.addEventListener("submit", (event) => {
   if ($("work").value) setDetail("Rotina de trabalho", $("work").value);
   const exerciseSummary = [...document.querySelectorAll('input[name="exercise"]:checked')].map(el => {
     const name = el.value;
-    const index = exerciseNames.indexOf(name);
-    const days = document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="days"]`)?.value || "";
-    const minutes = document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="minutes"]`)?.value || "";
-    const intensity = document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="intensity"]`)?.value || "";
-    return name + (days || minutes || intensity ? ": " + [days ? days + " dia(s)/semana" : "", minutes ? minutes + " min/sessão" : "", intensity ? "intensidade " + intensity.toLowerCase() : ""].filter(Boolean).join(", ") : "");
+    const getValue = suffix => document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="${suffix}"]`)?.value || "";
+    const modality = getValue("modality");
+    const days = getValue("days");
+    const minutes = getValue("minutes");
+    const intensity = getValue("intensity");
+    const details = [
+      modality ? "modalidade: " + modality : "",
+      days ? days + " dia(s)/semana" : "",
+      minutes ? minutes + " min/sessão" : "",
+      intensity ? "intensidade " + intensity.toLowerCase() : ""
+    ].filter(Boolean);
+    return (name === "Cardio" ? "Cardio" : "Musculação") + (details.length ? ": " + details.join(", ") : "");
   });
   if (exerciseSummary.length) setDetail("Modalidades praticadas", exerciseSummary.join(" | "));
   if ($("notes").value.trim()) setDetail("Observações", $("notes").value.trim());
