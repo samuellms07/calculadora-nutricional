@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Calculadora nutricional para estimativa de TMB, GET, IMC e ingestão hídrica.">
+<title>Calculadora Nutricional</title>
+<style>
+:root{
+  --blue:#1d4ed8;--blue-dark:#1e40af;--blue-soft:#eff6ff;
+  --ink:#172033;--muted:#64748b;--line:#e2e8f0;--bg:#f5f7fb;
+  --green:#15803d;--green-soft:#f0fdf4;--amber:#92400e;--amber-soft:#fffbeb;
+  --red:#b91c1c;--red-soft:#fef2f2;--white:#fff;--radius:16px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;line-height:1.5}
+header{background:linear-gradient(120deg,#172554,#1d4ed8);color:#fff;padding:34px 20px}
+.header-inner,main,.footer-inner{max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:clamp(1.65rem,4vw,2.25rem);letter-spacing:-.04em}
+header p{margin:7px 0 0;color:#dbeafe}
+main{padding:28px 18px 48px}
+.panel{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 5px 20px #0f172a08}
+.section-title{display:flex;align-items:center;gap:10px;margin:0 0 17px;font-size:1.12rem}
+.step{display:inline-grid;place-items:center;width:29px;height:29px;border-radius:9px;background:var(--blue-soft);color:var(--blue);font-weight:800;font-size:.85rem}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.field{min-width:0}
+label,.field-label{display:block;font-weight:650;font-size:.9rem;margin-bottom:6px}
+input,select,textarea{width:100%;min-height:44px;border:1px solid #cbd5e1;border-radius:10px;padding:10px 12px;background:#fff;color:var(--ink);font:inherit}
+input:focus,select:focus,textarea:focus{outline:3px solid #93c5fd66;border-color:var(--blue)}
+.hint{font-size:.78rem;color:var(--muted);margin:5px 0 0}
+.required{color:var(--red)}
+.options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.option{position:relative}
+.option input{position:absolute;opacity:0;pointer-events:none}
+.option label{display:block;height:100%;border:1px solid var(--line);border-radius:12px;padding:13px 14px;cursor:pointer;margin:0;transition:.15s}
+.option label strong{display:block;font-size:.93rem;margin-bottom:3px}
+.option label span{display:block;color:var(--muted);font-size:.8rem;font-weight:400}
+.option input:checked+label{border:2px solid var(--blue);background:var(--blue-soft);padding:12px 13px}
+.option input:focus-visible+label{outline:3px solid #93c5fd}
+.inline-options{display:flex;flex-wrap:wrap;gap:10px}
+.inline-options .option{flex:1 1 180px}
+.hidden{display:none!important}
+.notice{padding:12px 14px;border-radius:11px;background:var(--blue-soft);color:#1e40af;font-size:.86rem;margin-top:14px}
+.notice.warning{background:var(--amber-soft);color:var(--amber)}
+.notice.danger{background:var(--red-soft);color:var(--red)}
+.error{color:var(--red);font-size:.82rem;margin-top:10px;min-height:1.2em}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+button{border:0;border-radius:11px;padding:12px 19px;font:inherit;font-weight:700;cursor:pointer;transition:.15s}
+button:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+.primary{background:var(--blue);color:white}.primary:hover{background:var(--blue-dark)}
+.secondary{background:#e2e8f0;color:#1e293b}.secondary:hover{background:#cbd5e1}
+.ghost{background:#fff;color:var(--blue);border:1px solid #bfdbfe}
+.results{margin-top:22px}
+.results h2{font-size:1.45rem;margin:0 0 5px}
+.results-intro{color:var(--muted);margin:0 0 18px}
+.result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.result-card{border:1px solid var(--line);border-radius:14px;padding:18px;background:#fff}
+.result-card .eyebrow{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;font-weight:750}
+.result-value{font-size:clamp(1.65rem,4vw,2.15rem);font-weight:800;letter-spacing:-.04em;margin:5px 0}
+.result-unit{font-size:.82rem;color:var(--muted)}
+.result-card p{font-size:.84rem;color:var(--muted);margin:8px 0 0}
+.result-card.highlight{border-color:#93c5fd;background:#f8fbff}
+.calorie-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:.9rem}
+.calorie-table th,.calorie-table td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left}
+.calorie-table th{font-size:.76rem;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.calorie-table td:last-child,.calorie-table th:last-child{text-align:right;font-weight:750}
+.calorie-table tr.selected{background:var(--blue-soft);color:#1e40af}
+.tag{display:inline-block;font-size:.72rem;background:#dbeafe;color:#1e40af;border-radius:999px;padding:3px 8px;margin-left:5px}
+.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.detail{background:#f8fafc;border-radius:10px;padding:10px 12px}
+.detail small{display:block;color:var(--muted);font-size:.74rem}
+.detail strong{font-size:.9rem;overflow-wrap:anywhere}
+footer{padding:0 18px 30px;color:var(--muted);font-size:.8rem}
+.footer-inner{border-top:1px solid var(--line);padding-top:18px}
+.disclaimer{margin-top:12px}
+hr{border:0;border-top:1px solid var(--line);margin:18px 0}
+
+/* ===================== MELHORIAS VISUAIS ===================== */
+svg.s{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+body{background:linear-gradient(180deg,#e6eefe 0,#f5f7fb 380px) no-repeat,#f5f7fb}
+header{position:relative;overflow:hidden;background:linear-gradient(120deg,#0f1f55 0%,#1d4ed8 62%,#0ea5e9 135%)}
+header::before{content:"";position:absolute;right:-70px;top:-90px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.08)}
+header::after{content:"";position:absolute;right:130px;bottom:-120px;width:210px;height:210px;border-radius:50%;background:rgba(255,255,255,.06)}
+.header-inner{position:relative;z-index:1}
+header h1{display:flex;align-items:center;gap:14px}
+.logo{display:grid;place-items:center;width:50px;height:50px;border-radius:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);flex:none}
+.logo svg{width:28px;height:28px}
+
+.panel{border-top:4px solid var(--acc,#2563eb);transition:box-shadow .2s}
+.panel:hover{box-shadow:0 8px 26px #0f172a12}
+form>.panel:nth-of-type(1){--acc:#2563eb;--acc-soft:#eaf1ff}
+form>.panel:nth-of-type(2){--acc:#0d9488;--acc-soft:#e6faf7}
+form>.panel:nth-of-type(3){--acc:#4f46e5;--acc-soft:#eeefff}
+form>.panel:nth-of-type(4){--acc:#ea580c;--acc-soft:#fff2e8}
+form>.panel:nth-of-type(5){--acc:#7c3aed;--acc-soft:#f3edff}
+form>.panel:nth-of-type(6){--acc:#475569;--acc-soft:#eef1f5}
+.step{background:var(--acc,#2563eb);color:#fff;box-shadow:0 3px 8px #0f172a22}
+.section-title{align-items:center}
+.section-title .ico{margin-left:auto;width:40px;height:40px;padding:9px;border-radius:12px;background:var(--acc-soft,#eaf1ff);color:var(--acc,#2563eb)}
+label .li{width:16px;height:16px;vertical-align:-3px;margin-right:7px;color:var(--acc,#2563eb)}
+input:focus,select:focus,textarea:focus{border-color:var(--acc,#2563eb);outline-color:color-mix(in srgb,var(--acc,#2563eb) 30%,transparent)}
+input.invalid,select.invalid{border-color:#dc2626!important;background:#fef2f2}
+.hint{color:#6b7a90}
+
+/* seleções em cartão */
+.option label{display:grid;grid-template-columns:auto 1fr;column-gap:12px;align-items:center;position:relative}
+.option label .oi{grid-row:1 / span 2;width:40px;height:40px;padding:9px;border-radius:12px;background:var(--ocs,#eaf1ff);color:var(--oc,#2563eb)}
+.option label strong,.option label span{grid-column:2}
+.option label:hover{border-color:var(--oc,#93c5fd);box-shadow:0 4px 14px #0f172a10}
+.option input:checked+label{border-color:var(--oc,#2563eb);background:var(--ocs,#eff6ff)}
+.option input:checked+label::after{content:"";position:absolute;top:9px;right:9px;width:20px;height:20px;border-radius:50%;background:var(--oc,#2563eb) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center/12px no-repeat}
+input[value="mifflin"]+label{--oc:#2563eb;--ocs:#eaf1ff}
+input[value="harris"]+label{--oc:#d97706;--ocs:#fff6e5}
+input[value="cunningham"]+label{--oc:#0d9488;--ocs:#e6faf7}
+input[value="tinsley"]+label{--oc:#7c3aed;--ocs:#f3edff}
+input[name="activity"][value="1.2"]+label{--oc:#64748b;--ocs:#f1f4f8}
+input[name="activity"][value="1.375"]+label{--oc:#16a34a;--ocs:#effbf3}
+input[name="activity"][value="1.55"]+label{--oc:#0891b2;--ocs:#e8f9fd}
+input[name="activity"][value="1.725"]+label{--oc:#ea580c;--ocs:#fff2e8}
+input[name="activity"][value="1.9"]+label{--oc:#dc2626;--ocs:#fef0f0}
+input[value="loss"]+label{--oc:#d97706;--ocs:#fff6e5}
+input[value="maintain"]+label{--oc:#2563eb;--ocs:#eaf1ff}
+input[value="gain"]+label{--oc:#16a34a;--ocs:#effbf3}
+input[value="muscle"]+label{--oc:#7c3aed;--ocs:#f3edff}
+
+/* avisos com ícone */
+.notice{display:flex;gap:10px;align-items:flex-start;--ni:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231e40af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M12 11v5M12 7.5v.01'/%3E%3C/svg%3E")}
+.notice.warning{--ni:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2392400e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l10 18H2L12 3zM12 10v5M12 18v.01'/%3E%3C/svg%3E")}
+.notice.danger{--ni:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b91c1c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l10 18H2L12 3zM12 10v5M12 18v.01'/%3E%3C/svg%3E")}
+.notice::before{content:"";flex:none;width:18px;height:18px;margin-top:1px;background:var(--ni) center/contain no-repeat}
+.notice.hidden::before{display:none}
+.error{white-space:pre-line}
+.error:not(:empty){background:var(--red-soft);border:1px solid #fecaca;border-radius:11px;padding:11px 14px;font-weight:600}
+
+/* botões */
+button{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+button .bi{width:18px;height:18px}
+.primary{background:linear-gradient(135deg,#2563eb,#1d4ed8);box-shadow:0 4px 12px #1d4ed84d}
+.primary:hover{background:linear-gradient(135deg,#1d4ed8,#1e3a8a);transform:translateY(-1px)}
+.secondary{color:#334155}
+.ghost:hover{background:var(--blue-soft)}
+
+/* resultados */
+.result-card{border:1px solid var(--line);border-top:4px solid var(--rc,#cbd5e1);background:linear-gradient(180deg,var(--rcs,#f8fafc) 0,#fff 85px)}
+.result-card.highlight{border-color:var(--line);border-top-color:var(--rc,#2563eb);background:linear-gradient(180deg,var(--rcs,#f8fafc) 0,#fff 85px)}
+.result-grid>.result-card:nth-child(1){--rc:#2563eb;--rcs:#eaf1ff}
+.result-grid>.result-card:nth-child(2){--rc:#ea580c;--rcs:#fff2e8}
+.result-grid>.result-card:nth-child(3){--rc:#7c3aed;--rcs:#f3edff}
+.result-grid>.result-card:nth-child(4){--rc:#0891b2;--rcs:#e8f9fd}
+.result-card.t-goal{--rc:#16a34a;--rcs:#effbf3}
+.result-card.t-data{--rc:#475569;--rcs:#eef1f5}
+.result-card .eyebrow{display:flex;align-items:center;gap:10px}
+.result-card .ri{width:36px;height:36px;padding:8px;border-radius:11px;background:#fff;color:var(--rc,#2563eb);box-shadow:0 1px 4px #0f172a14}
+.result-value{color:var(--rc,var(--ink))}
+#outFormula,#outActivity{white-space:pre-line}
+.pill{display:inline-block;padding:3px 12px;border-radius:999px;font-weight:700;font-size:.8rem}
+.pill.low{background:#fef3c7;color:#92400e}
+.pill.ok{background:#dcfce7;color:#166534}
+.pill.over{background:#ffedd5;color:#9a3412}
+.pill.ob{background:#fee2e2;color:#991b1b}
+.calorie-table td .ti{width:18px;height:18px;vertical-align:-4px;margin-right:8px}
+#rowLoss td:first-child{border-left:5px solid #d97706}#rowLoss .ti{color:#d97706}
+#rowMaintain td:first-child{border-left:5px solid #2563eb}#rowMaintain .ti{color:#2563eb}
+#rowGain td:first-child{border-left:5px solid #16a34a}#rowGain .ti{color:#16a34a}
+.calorie-table tr#rowLoss.selected{background:#fff6e5;color:#92400e}
+.calorie-table tr#rowMaintain.selected{background:#eaf1ff;color:#1e40af}
+.calorie-table tr#rowGain.selected{background:#effbf3;color:#166534}
+.calorie-table tr.selected td{font-weight:800}
+.calorie-table .tag{background:#fff;border:1px solid currentColor;font-weight:700;white-space:nowrap}
+.detail{border-left:3px solid #bfdbfe}
+#outGoal{color:#166534!important}
+footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#2563eb}
+@media(max-width:700px){
+  header{padding:27px 18px}
+  main{padding:18px 12px 35px}
+  .panel{padding:17px}
+  .grid,.grid.three,.result-grid,.details{grid-template-columns:1fr}
+  .options{grid-template-columns:1fr}
+  .calorie-table{font-size:.82rem}
+  .calorie-table th,.calorie-table td{padding:10px 6px}
+}
+@media print{
+  body{background:#fff;color:#111}
+  header{background:#fff;color:#111;padding:0 0 18px;border-bottom:2px solid #1d4ed8}
+  header p{color:#475569}
+  main{padding:18px 0}
+  .no-print,form,.actions,footer{display:none!important}
+  #results:not(.hidden){display:block!important;margin:0}
+  .panel,.result-card{box-shadow:none;break-inside:avoid;border-color:#cbd5e1}
+  .result-grid{grid-template-columns:repeat(2,1fr)}
+  .calorie-table tr.selected{background:#eff6ff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .print-heading{display:block!important}
+}
+.print-heading{display:none}
+
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  header::before,header::after{display:none}
+  .logo{background:#eaf1ff;border-color:#bfdbfe;color:#1d4ed8}
+  .panel{border-top-width:3px}
+  .option label:hover{box-shadow:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+<symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></symbol>
+<symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0L5 7zM19 7l-3 7a3 3 0 0 0 6 0l-3-7z"/></symbol>
+<symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="i-clip" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11h6M9 15h6"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-6 1-9z"/></symbol>
+<symbol id="i-drop" viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/></symbol>
+<symbol id="i-flask" viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M8 15h8"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+<symbol id="i-ruler" viewBox="0 0 24 24"><path d="M8 3h8v18H8zM8 7h3M8 11h4M8 15h3"/></symbol>
+<symbol id="i-tape" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="1.5"/><path d="M7 8v3M11 8v4M15 8v3M19 8v4"/></symbol>
+<symbol id="i-percent" viewBox="0 0 24 24"><path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.5"/><circle cx="17" cy="17" r="2.5"/></symbol>
+<symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></symbol>
+<symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+<symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20l4-1 11-11a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2V5zM4 21h15"/></symbol>
+<symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M3 7l6 6 4-4 8 8M21 11v6h-6"/></symbol>
+<symbol id="i-equal" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></symbol>
+<symbol id="i-eraser" viewBox="0 0 24 24"><path d="M20 20H9l-5-5a2 2 0 0 1 0-2.8l8.2-8.2a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 0 2.8L12 20M7 10l7 7"/></symbol>
+<symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.5-3M4 5v4h4M4 13a8 8 0 0 0 14.5 3M20 19v-4h-4"/></symbol>
+<symbol id="i-lvl1" viewBox="0 0 24 24"><path d="M3.5 20V16.0" opacity="1" stroke-width="2.6"/><path d="M7.5 20V12.8" opacity=".22" stroke-width="2.6"/><path d="M11.5 20V9.6" opacity=".22" stroke-width="2.6"/><path d="M15.5 20V6.4" opacity=".22" stroke-width="2.6"/><path d="M19.5 20V3.2" opacity=".22" stroke-width="2.6"/></symbol>
+<symbol id="i-lvl2" viewBox="0 0 24 24"><path d="M3.5 20V16.0" opacity="1" stroke-width="2.6"/><path d="M7.5 20V12.8" opacity="1" stroke-width="2.6"/><path d="M11.5 20V9.6" opacity=".22" stroke-width="2.6"/><path d="M15.5 20V6.4" opacity=".22" stroke-width="2.6"/><path d="M19.5 20V3.2" opacity=".22" stroke-width="2.6"/></symbol>
+<symbol id="i-lvl3" viewBox="0 0 24 24"><path d="M3.5 20V16.0" opacity="1" stroke-width="2.6"/><path d="M7.5 20V12.8" opacity="1" stroke-width="2.6"/><path d="M11.5 20V9.6" opacity="1" stroke-width="2.6"/><path d="M15.5 20V6.4" opacity=".22" stroke-width="2.6"/><path d="M19.5 20V3.2" opacity=".22" stroke-width="2.6"/></symbol>
+<symbol id="i-lvl4" viewBox="0 0 24 24"><path d="M3.5 20V16.0" opacity="1" stroke-width="2.6"/><path d="M7.5 20V12.8" opacity="1" stroke-width="2.6"/><path d="M11.5 20V9.6" opacity="1" stroke-width="2.6"/><path d="M15.5 20V6.4" opacity="1" stroke-width="2.6"/><path d="M19.5 20V3.2" opacity=".22" stroke-width="2.6"/></symbol>
+<symbol id="i-lvl5" viewBox="0 0 24 24"><path d="M3.5 20V16.0" opacity="1" stroke-width="2.6"/><path d="M7.5 20V12.8" opacity="1" stroke-width="2.6"/><path d="M11.5 20V9.6" opacity="1" stroke-width="2.6"/><path d="M15.5 20V6.4" opacity="1" stroke-width="2.6"/><path d="M19.5 20V3.2" opacity="1" stroke-width="2.6"/></symbol>
+</defs></svg>
+<header>
+  <div class="header-inner">
+    <h1><span class="logo"><svg class="s logo-i" aria-hidden="true" focusable="false"><use href="#i-calc"/></svg></span>Calculadora Nutricional</h1>
+    <p>Estimativa de necessidades energéticas e hídricas</p>
+  </div>
+</header>
+
+<main>
+<form id="calculatorForm" novalidate>
+  <section class="panel">
+    <h2 class="section-title"><span class="step">1</span> Dados antropométricos<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-user"/></svg></h2>
+    <div class="grid">
+      <div class="field">
+        <label for="age"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg>Idade (anos) <span class="required">*</span></label>
+        <input id="age" name="age" type="text" inputmode="numeric" autocomplete="off" placeholder="Ex.: 31" required>
+      </div>
+      <div class="field">
+        <label for="sex"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-user"/></svg>Sexo biológico <span class="required">*</span></label>
+        <select id="sex" required>
+          <option value="">Selecione</option>
+          <option value="male">Masculino</option>
+          <option value="female">Feminino</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="weight"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg>Peso atual (kg) <span class="required">*</span></label>
+        <input id="weight" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 75,5" required>
+      </div>
+      <div class="field">
+        <label for="height"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-ruler"/></svg>Altura (cm) <span class="required">*</span></label>
+        <input id="height" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 175" required>
+      </div>
+      <div class="field">
+        <label for="waist"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-tape"/></svg>Circunferência abdominal (cm)</label>
+        <input id="waist" type="text" inputmode="decimal" autocomplete="off" placeholder="Opcional">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title"><span class="step">2</span> Composição corporal<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg></h2>
+    <p class="hint" style="margin:0 0 14px">Esses dados são necessários para utilizar Cunningham ou Tinsley. Para Mifflin ou Harris-Benedict, são opcionais.</p>
+    <div class="grid">
+      <div class="field">
+        <label for="bodyFat"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-percent"/></svg>Percentual de gordura corporal (%)</label>
+        <input id="bodyFat" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 18">
+        <p class="hint">Usado para estimar a massa magra.</p>
+      </div>
+      <div class="field">
+        <label for="leanMass"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg>Massa magra (kg)</label>
+        <input id="leanMass" type="text" inputmode="decimal" autocomplete="off" placeholder="Opcional">
+        <p class="hint">Se informada, terá prioridade sobre a massa magra calculada.</p>
+      </div>
+    </div>
+    <div id="bodyCompHint" class="notice">Informe percentual de gordura ou massa magra somente se for utilizar Cunningham ou Tinsley.</div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title"><span class="step">3</span> Fórmula para estimar a TMB<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-flask"/></svg></h2>
+    <div class="options">
+      <div class="option">
+        <input type="radio" id="formulaMifflin" name="formula" value="mifflin" checked>
+        <label for="formulaMifflin"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg><strong>Mifflin-St Jeor</strong><span>Equação frequentemente utilizada em adultos, inclusive com sobrepeso e obesidade.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="formulaHarris" name="formula" value="harris">
+        <label for="formulaHarris"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><strong>Harris-Benedict (original)</strong><span>Equação original, frequentemente utilizada em indivíduos saudáveis e eutróficos.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="formulaCunningham" name="formula" value="cunningham">
+        <label for="formulaCunningham"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg><strong>Cunningham</strong><span>Utiliza massa magra; pode ser considerada em pessoas atléticas e musculosas.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="formulaTinsley" name="formula" value="tinsley">
+        <label for="formulaTinsley"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg><strong>Tinsley</strong><span>Utiliza massa magra; requer dados de composição corporal.</span></label>
+      </div>
+    </div>
+    <div id="formulaHelp" class="notice">Mifflin-St Jeor: utiliza peso, altura, idade e sexo biológico.</div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title"><span class="step">4</span> Nível de atividade física<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg></h2>
+    <div class="options">
+      <div class="option">
+        <input type="radio" id="activity1" name="activity" value="1.2">
+        <label for="activity1"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-lvl1"/></svg><strong>Sedentário · 1,20</strong><span>Pouco ou nenhum exercício.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="activity2" name="activity" value="1.375" checked>
+        <label for="activity2"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-lvl2"/></svg><strong>Levemente ativo · 1,375</strong><span>Exercícios de 1 a 3 vezes por semana.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="activity3" name="activity" value="1.55">
+        <label for="activity3"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-lvl3"/></svg><strong>Moderadamente ativo · 1,55</strong><span>Exercícios de 3 a 5 vezes por semana.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="activity4" name="activity" value="1.725">
+        <label for="activity4"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-lvl4"/></svg><strong>Muito ativo · 1,725</strong><span>Exercícios intensos de 6 a 7 vezes por semana.</span></label>
+      </div>
+      <div class="option">
+        <input type="radio" id="activity5" name="activity" value="1.9">
+        <label for="activity5"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-lvl5"/></svg><strong>Extremamente ativo · 1,90</strong><span>Treinamento muito intenso e/ou trabalho físico pesado.</span></label>
+      </div>
+    </div>
+    <hr>
+    <div class="grid">
+      <div class="field">
+        <label for="work"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-briefcase"/></svg>Como é sua rotina de trabalho?</label>
+        <select id="work">
+          <option value="">Selecione (opcional)</option>
+          <option>Predominantemente sentado</option>
+          <option>Alterno entre sentado e em pé</option>
+          <option>Predominantemente em pé</option>
+          <option>Trabalho com esforço físico</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="frequency"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg>Quantos dias por semana pratica exercícios?</label>
+        <select id="frequency">
+          <option value="">Selecione (opcional)</option>
+          <option>Não pratico</option>
+          <option>1 a 2 dias</option>
+          <option>3 a 4 dias</option>
+          <option>5 a 6 dias</option>
+          <option>Todos os dias</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="exercise"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg>Qual atividade pratica?</label>
+        <select id="exercise">
+          <option value="">Selecione (opcional)</option>
+          <option>Musculação</option><option>Caminhada</option><option>Corrida</option>
+          <option>Ciclismo</option><option>Natação</option><option>Esportes coletivos</option>
+          <option>Treinamento funcional</option><option>Outra atividade</option><option>Não pratico exercícios</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">As informações complementares ajudam a contextualizar a escolha. Não serão multiplicadas novamente pelo GET.</p>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title"><span class="step">5</span> Objetivo nutricional<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-target"/></svg></h2>
+    <div class="inline-options">
+      <div class="option"><input type="radio" id="goalLoss" name="goal" value="loss" checked><label for="goalLoss"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-down"/></svg><strong>Perda de peso</strong><span>Estimativa com déficit de 20%.</span></label></div>
+      <div class="option"><input type="radio" id="goalMaintain" name="goal" value="maintain"><label for="goalMaintain"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-equal"/></svg><strong>Manutenção</strong><span>Estimativa equivalente ao GET.</span></label></div>
+      <div class="option"><input type="radio" id="goalGain" name="goal" value="gain"><label for="goalGain"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-up"/></svg><strong>Ganho de peso</strong><span>Estimativa com superávit de 20%.</span></label></div>
+      <div class="option"><input type="radio" id="goalMuscle" name="goal" value="muscle"><label for="goalMuscle"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg><strong>Ganho de massa muscular</strong><span>Estimativa inicial com superávit de 20%.</span></label></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 class="section-title"><span class="step">6</span> Informações complementares<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-clip"/></svg></h2>
+    <div class="field">
+      <label for="clinical"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg>Você está em alguma destas condições?</label>
+      <select id="clinical">
+        <option value="none">Nenhuma das opções</option>
+        <option value="pregnancy">Gestação</option>
+        <option value="lactation">Lactação</option>
+        <option value="minor">Menor de 18 anos</option>
+      </select>
+    </div>
+    <div id="clinicalNotice" class="notice warning hidden">As equações e referências desta calculadora não são apropriadas para gerar recomendações automáticas nesta condição. Procure avaliação individualizada de profissional habilitado.</div>
+    <div class="field" style="margin-top:15px">
+      <label for="notes"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-pencil"/></svg>Observações (opcional)</label>
+      <textarea id="notes" rows="3" placeholder="Informações adicionais relevantes para a avaliação..."></textarea>
+    </div>
+  </section>
+
+  <div class="actions no-print">
+    <button class="primary" type="submit"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-calc"/></svg>Calcular resultados</button>
+    <button class="secondary" type="reset"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-eraser"/></svg>Limpar formulário</button>
+  </div>
+  <div id="formError" class="error" role="alert" aria-live="polite"></div>
+</form>
+
+<section id="results" class="results hidden" aria-live="polite">
+  <div class="panel">
+    <div class="print-heading"><strong>CALCULADORA NUTRICIONAL — RESULTADO DA AVALIAÇÃO</strong></div>
+    <h2>Resultado da avaliação</h2>
+    <p class="results-intro">Estimativas calculadas a partir dos dados informados.</p>
+    <div id="specialWarning" class="notice warning hidden"></div>
+    <div class="result-grid">
+      <article class="result-card highlight">
+        <div class="eyebrow"><svg class="s ri" aria-hidden="true" focusable="false"><use href="#i-calc"/></svg>Taxa Metabólica Basal · TMB</div>
+        <div class="result-value" id="outTmb">—</div>
+        <div class="result-unit">kcal por dia</div>
+        <p id="outFormula"></p>
+      </article>
+      <article class="result-card highlight">
+        <div class="eyebrow"><svg class="s ri" aria-hidden="true" focusable="false"><use href="#i-flame"/></svg>Gasto Energético Total · GET</div>
+        <div class="result-value" id="outGet">—</div>
+        <div class="result-unit">kcal por dia</div>
+        <p id="outActivity"></p>
+      </article>
+      <article class="result-card">
+        <div class="eyebrow"><svg class="s ri" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg>Índice de Massa Corporal · IMC</div>
+        <div class="result-value" id="outImc">—</div>
+        <div class="result-unit" id="outImcClass"></div>
+        <p>Indicador de triagem; não diferencia massa muscular de massa gorda.</p>
+      </article>
+      <article class="result-card">
+        <div class="eyebrow"><svg class="s ri" aria-hidden="true" focusable="false"><use href="#i-drop"/></svg>Estimativa de ingestão hídrica</div>
+        <div class="result-value" id="outWater">—</div>
+        <div class="result-unit" id="outWaterMl"></div>
+        <p>Referência inicial de 35 ml por kg de peso corporal.</p>
+      </article>
+    </div>
+    <div class="result-card t-goal" style="margin-top:14px">
+      <div class="eyebrow"><svg class="s ri" aria-hidden="true" focusable="false"><use href="#i-target"/></svg>Estimativa calórica por objetivo</div>
+      <table class="calorie-table">
+        <thead><tr><th>Objetivo</th><th>Ajuste sobre GET</th><th>kcal/dia</th></tr></thead>
+        <tbody>
+          <tr id="rowLoss"><td><svg class="s ti" aria-hidden="true" focusable="false"><use href="#i-down"/></svg>Perda de peso</td><td>−20%</td><td id="outLoss">—</td></tr>
+          <tr id="rowMaintain"><td><svg class="s ti" aria-hidden="true" focusable="false"><use href="#i-equal"/></svg>Manutenção</td><td>0%</td><td id="outMaintain">—</td></tr>
+          <tr id="rowGain"><td><svg class="s ti" aria-hidden="true" focusable="false"><use href="#i-up"/></svg>Ganho de peso / massa muscular</td><td>+20%</td><td id="outGain">—</td></tr>
+        </tbody>
+      </table>
+      <p id="outGoal" style="color:#1e40af;font-weight:700"></p>
+      <p>Os ajustes são parâmetros gerais de estimativa, não recomendações universais. A adequação deve ser individualizada.</p>
+    </div>
+    <div class="result-card t-data" style="margin-top:14px">
+      <div class="eyebrow"><svg class="s ri" aria-hidden="true" focusable="false"><use href="#i-list"/></svg>Dados utilizados na avaliação</div>
+      <div class="details" id="details"></div>
+    </div>
+    <div class="notice warning" style="margin-top:14px">
+      As equações preditivas apresentam erro individual. A estimativa pode variar aproximadamente ±250 kcal/dia ou mais, sem que isso represente um intervalo estatístico garantido. Os resultados não substituem avaliação nutricional individualizada.
+    </div>
+    <div class="actions no-print">
+      <button class="primary" type="button" id="printBtn"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-print"/></svg>Imprimir / Salvar PDF</button>
+      <button class="ghost" type="button" id="newBtn"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>Nova avaliação</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <svg class="s fi" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><strong>Privacidade:</strong> os dados informados são utilizados exclusivamente para realizar os cálculos nesta página. A aplicação não envia nem armazena informações pessoais.
+    <p class="disclaimer">Esta calculadora utiliza equações preditivas para estimar necessidades energéticas e hídricas. Os resultados são aproximados e não substituem uma avaliação nutricional individualizada. As necessidades podem variar conforme composição corporal, condições clínicas, rotina, nível de atividade física e outros fatores individuais. Os resultados não constituem diagnóstico ou prescrição nutricional.</p>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+// Parâmetros centralizados para facilitar futuras alterações.
+const CONFIG = {
+  deficitCalorico: 0.20,
+  superavitCalorico: 0.20,
+  hidratacaoMlPorKg: 35,
+  fatoresAtividade: {
+    "1.2": "Sedentário",
+    "1.375": "Levemente ativo",
+    "1.55": "Moderadamente ativo",
+    "1.725": "Muito ativo",
+    "1.9": "Extremamente ativo"
+  }
+};
+
+const $ = (id) => document.getElementById(id);
+const form = $("calculatorForm");
+const results = $("results");
+
+function selected(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || "";
+}
+
+/**
+ * Lê um campo numérico. Aceita vírgula ou ponto como decimal.
+ * Retorna null (vazio), NaN (texto inválido) ou o número.
+ */
+function numberValue(id) {
+  const raw = $(id).value.trim().replace(/\s+/g, "");
+  if (raw === "") return null;
+  if (!/^-?\d+([.,]\d+)?$/.test(raw)) return NaN;
+  return Number(raw.replace(",", "."));
+}
+// Formata com número fixo de casas decimais.
+function fmt(value, decimals = 0) {
+  return new Intl.NumberFormat("pt-BR", {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  }).format(value);
+}
+// Formata mostrando só as casas necessárias (até "max").
+function fmtMax(value, max = 3) {
+  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: max }).format(value);
+}
+// Fator de atividade: 1,20 · 1,375 · 1,55 · 1,725 · 1,90
+function fmtFactor(value) {
+  return new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 3 }).format(value);
+}
+
+function showFormulaHelp() {
+  const formula = selected("formula");
+  const help = {
+    mifflin: "Mifflin-St Jeor: utiliza peso, altura, idade e sexo biológico.",
+    harris: "Harris-Benedict original: utiliza peso, altura, idade e sexo biológico. Pode superestimar o gasto em pessoas com sobrepeso ou obesidade.",
+    cunningham: "Cunningham: TMB = 500 + (22 × massa magra). Informe massa magra diretamente ou percentual de gordura.",
+    tinsley: "Tinsley: TMB = 370 + (21,6 × massa magra). Informe massa magra diretamente ou percentual de gordura."
+  };
+  $("formulaHelp").textContent = help[formula];
+  const needsLean = formula === "cunningham" || formula === "tinsley";
+  $("bodyCompHint").textContent = needsLean
+    ? "Para esta fórmula, informe a massa magra diretamente ou o percentual de gordura para que ela seja estimada."
+    : "Percentual de gordura e massa magra são opcionais para a fórmula selecionada.";
+}
+document.querySelectorAll('input[name="formula"]').forEach(el => el.addEventListener("change", showFormulaHelp));
+$("clinical").addEventListener("change", () => {
+  $("clinicalNotice").classList.toggle("hidden", $("clinical").value === "none");
+});
+
+function calculateTmb(formula, sex, weight, height, age, leanMass) {
+  if (formula === "mifflin") {
+    return sex === "male"
+      ? (10 * weight) + (6.25 * height) - (5 * age) + 5
+      : (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  }
+  if (formula === "harris") {
+    return sex === "male"
+      ? 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age)
+      : 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+  }
+  if (formula === "cunningham") return 500 + (22 * leanMass);
+  if (formula === "tinsley") return 370 + (21.6 * leanMass);
+  throw new Error("Fórmula não reconhecida.");
+}
+
+// Mostra a conta com os valores usados, para conferência.
+function equationText(formula, sex, weight, height, age, leanMass) {
+  const W = fmtMax(weight), H = fmtMax(height), A = fmtMax(age);
+  const L = leanMass === null ? "" : fmtMax(leanMass);
+  if (formula === "mifflin") return `(10 × ${W}) + (6,25 × ${H}) − (5 × ${A}) ${sex === "male" ? "+ 5" : "− 161"}`;
+  if (formula === "harris") {
+    return sex === "male"
+      ? `66,5 + (13,75 × ${W}) + (5,003 × ${H}) − (6,75 × ${A})`
+      : `655,1 + (9,563 × ${W}) + (1,850 × ${H}) − (4,676 × ${A})`;
+  }
+  if (formula === "cunningham") return `500 + (22 × ${L})`;
+  return `370 + (21,6 × ${L})`;
+}
+
+function imcClassification(imc) {
+  if (imc < 18.5) return "Baixo peso";
+  if (imc < 25) return "Eutrofia";
+  if (imc < 30) return "Sobrepeso";
+  if (imc < 35) return "Obesidade grau I";
+  if (imc < 40) return "Obesidade grau II";
+  return "Obesidade grau III";
+}
+function imcPillClass(imc) {
+  return imc < 18.5 ? "low" : imc < 25 ? "ok" : imc < 30 ? "over" : "ob";
+}
+
+function setDetail(label, value) {
+  const div = document.createElement("div");
+  div.className = "detail";
+  const small = document.createElement("small");
+  small.textContent = label;
+  const strong = document.createElement("strong");
+  strong.textContent = value;
+  div.append(small, strong);
+  $("details").append(div);
+}
+
+function clearInvalid() {
+  document.querySelectorAll(".invalid").forEach(el => el.classList.remove("invalid"));
+}
+form.addEventListener("input", (e) => e.target.classList?.remove("invalid"));
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  $("formError").textContent = "";
+  clearInvalid();
+  results.classList.add("hidden");
+
+  const age = numberValue("age");
+  const weight = numberValue("weight");
+  const height = numberValue("height");
+  const waist = numberValue("waist");
+  const bodyFat = numberValue("bodyFat");
+  const leanInput = numberValue("leanMass");
+  const sex = $("sex").value;
+  const formula = selected("formula");
+  const activity = selected("activity");
+  const goal = selected("goal");
+  const clinical = $("clinical").value;
+
+  const errors = [];
+  const bad = new Set();
+  const fail = (msg, ...ids) => { errors.push(msg); ids.forEach(i => bad.add(i)); };
+
+  // Menor de 18 anos informado na idade: mesmo aviso da opção "Menor de 18 anos".
+  const minorByAge = Number.isFinite(age) && age > 0 && age < 18;
+  if (!minorByAge && (age === null || !Number.isInteger(age) || age < 18 || age > 120)) {
+    fail("Informe uma idade válida entre 18 e 120 anos (somente números inteiros).", "age");
+  }
+  if (!sex) fail("Selecione o sexo biológico.", "sex");
+  if (weight === null || !Number.isFinite(weight) || weight <= 0 || weight > 500) fail("Informe um peso válido, maior que zero e até 500 kg.", "weight");
+  if (height === null || !Number.isFinite(height) || height < 50 || height > 250) fail("Informe uma altura válida entre 50 e 250 cm.", "height");
+  if (!activity) fail("Selecione o nível de atividade física.");
+  if (waist !== null && (!Number.isFinite(waist) || waist <= 0 || waist > 250)) fail("Confira a circunferência abdominal (número maior que zero, até 250 cm).", "waist");
+  if (bodyFat !== null && (!Number.isFinite(bodyFat) || bodyFat <= 0 || bodyFat > 75)) fail("O percentual de gordura deve ser um número maior que zero e até 75%.", "bodyFat");
+  if (leanInput !== null && (!Number.isFinite(leanInput) || leanInput <= 0 || (Number.isFinite(weight) && leanInput >= weight))) {
+    fail("A massa magra deve ser um número maior que zero e inferior ao peso corporal.", "leanMass");
+  }
+
+  if (clinical !== "none" || minorByAge) {
+    $("formError").textContent = "A calculadora não gera estimativas automáticas para a condição informada (gestação, lactação ou menor de 18 anos). Procure avaliação individualizada de profissional habilitado.";
+    $("clinicalNotice").classList.remove("hidden");
+    return;
+  }
+
+  // Massa magra: a informada diretamente tem prioridade sobre a estimada pelo % de gordura.
+  let leanMass = null;
+  let leanSource = "";
+  if (leanInput !== null && Number.isFinite(leanInput) && Number.isFinite(weight) && leanInput > 0 && leanInput < weight) {
+    leanMass = leanInput;
+    leanSource = "Informada diretamente";
+  } else if (bodyFat !== null && Number.isFinite(bodyFat) && Number.isFinite(weight) && bodyFat > 0 && bodyFat < 100) {
+    leanMass = weight * (1 - bodyFat / 100);
+    leanSource = "Estimativa pelo percentual de gordura";
+  }
+
+  if ((formula === "cunningham" || formula === "tinsley") && leanMass === null && !bad.has("leanMass") && !bad.has("bodyFat")) {
+    fail("Para Cunningham ou Tinsley, informe a massa magra ou o percentual de gordura corporal.", "leanMass", "bodyFat");
+  }
+  if (errors.length) {
+    $("formError").textContent = errors.join("\n");
+    bad.forEach(id => $(id).classList.add("invalid"));
+    const first = [...bad][0];
+    if (first) $(first).focus();
+    return;
+  }
+
+  // Valores intermediários não são arredondados; só a exibição é.
+  const tmb = calculateTmb(formula, sex, weight, height, age, leanMass);
+  if (!Number.isFinite(tmb) || tmb <= 0) {
+    $("formError").textContent = "Não foi possível calcular a TMB. Confira os dados informados.";
+    return;
+  }
+
+  const factor = Number(activity);
+  const get = tmb * factor;
+  const imc = weight / Math.pow(height / 100, 2);
+  const waterMl = weight * CONFIG.hidratacaoMlPorKg;
+  const loss = get * (1 - CONFIG.deficitCalorico);
+  const maintain = get;
+  const gain = get * (1 + CONFIG.superavitCalorico);
+  const usesLean = formula === "cunningham" || formula === "tinsley";
+
+  const formulaNames = {
+    mifflin: "Mifflin-St Jeor",
+    harris: "Harris-Benedict (original)",
+    cunningham: "Cunningham",
+    tinsley: "Tinsley"
+  };
+  const goalNames = {
+    loss: "Perda de peso",
+    maintain: "Manutenção de peso",
+    gain: "Ganho de peso",
+    muscle: "Ganho de massa muscular"
+  };
+
+  $("outTmb").textContent = fmt(tmb);
+  $("outGet").textContent = fmt(get);
+  $("outImc").textContent = fmt(imc, 2);
+  $("outImcClass").textContent = imcClassification(imc);
+  $("outImcClass").className = "result-unit pill " + imcPillClass(imc);
+  $("outWater").textContent = fmt(waterMl / 1000, 2) + " L";
+  $("outWaterMl").textContent = fmt(waterMl) + " ml por dia";
+  $("outFormula").textContent = "Equação: " + formulaNames[formula] + (usesLean ? " · Massa magra: " + fmt(leanMass, 1) + " kg" : "")
+    + "\nTMB = " + equationText(formula, sex, weight, height, age, leanMass) + " = " + fmt(tmb, 1) + " kcal";
+  $("outActivity").textContent = CONFIG.fatoresAtividade[activity] + " · Fator " + fmtFactor(factor)
+    + "\nGET = TMB × fator = " + fmt(tmb, 1) + " × " + fmtFactor(factor) + " = " + fmt(get, 1) + " kcal";
+  $("outLoss").textContent = fmt(loss);
+  $("outMaintain").textContent = fmt(maintain);
+  $("outGain").textContent = fmt(gain);
+  $("outGoal").textContent = "Objetivo selecionado: " + goalNames[goal] + ". A estimativa correspondente está destacada na tabela.";
+
+  // Percentuais da tabela vêm da CONFIG (mudou o déficit/superávit, a tabela acompanha).
+  $("rowLoss").children[1].textContent = "−" + fmtMax(CONFIG.deficitCalorico * 100, 1) + "%";
+  $("rowMaintain").children[1].textContent = "0%";
+  $("rowGain").children[1].textContent = "+" + fmtMax(CONFIG.superavitCalorico * 100, 1) + "%";
+
+  ["rowLoss", "rowMaintain", "rowGain"].forEach(id => {
+    $(id).classList.remove("selected");
+    $(id).firstElementChild.querySelector(".tag")?.remove();
+  });
+  const rowId = goal === "loss" ? "rowLoss" : goal === "maintain" ? "rowMaintain" : "rowGain";
+  $(rowId).classList.add("selected");
+  const tag = document.createElement("span");
+  tag.className = "tag";
+  tag.textContent = "Seu objetivo";
+  $(rowId).firstElementChild.append(tag);
+
+  $("details").replaceChildren();
+  setDetail("Idade", age + " anos");
+  setDetail("Sexo biológico", sex === "male" ? "Masculino" : "Feminino");
+  setDetail("Peso", fmt(weight, 1) + " kg");
+  setDetail("Altura", fmt(height, 1) + " cm");
+  setDetail("IMC", fmt(imc, 2) + " kg/m² · " + imcClassification(imc));
+  setDetail("Fórmula de TMB", formulaNames[formula]);
+  setDetail("Nível de atividade", CONFIG.fatoresAtividade[activity]);
+  setDetail("Fator aplicado", fmtFactor(factor));
+  setDetail("Objetivo", goalNames[goal]);
+  if (bodyFat !== null) setDetail("Gordura corporal", fmt(bodyFat, 1) + "%");
+  if (leanMass !== null) {
+    setDetail("Massa magra", fmt(leanMass, 1) + " kg (" + leanSource + (usesLean ? "" : "; não usada na fórmula escolhida") + ")");
+  }
+  if (waist !== null) setDetail("Circunferência abdominal", fmt(waist, 1) + " cm");
+  if ($("work").value) setDetail("Rotina de trabalho", $("work").value);
+  if ($("frequency").value) setDetail("Frequência de exercícios", $("frequency").value);
+  if ($("exercise").value) setDetail("Atividade praticada", $("exercise").value);
+  if ($("notes").value.trim()) setDetail("Observações", $("notes").value.trim());
+
+  // Alerta: Harris-Benedict original tende a superestimar em IMC >= 30.
+  const warn = $("specialWarning");
+  if (formula === "harris" && imc >= 30) {
+    warn.textContent = "IMC igual ou superior a 30: a equação original de Harris-Benedict pode superestimar o gasto energético. Considere comparar com Mifflin-St Jeor.";
+    warn.classList.remove("hidden");
+  } else {
+    warn.classList.add("hidden");
+  }
+
+  results.classList.remove("hidden");
+  results.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+form.addEventListener("reset", () => {
+  $("formError").textContent = "";
+  clearInvalid();
+  results.classList.add("hidden");
+  $("clinicalNotice").classList.add("hidden");
+  setTimeout(showFormulaHelp, 0);
+});
+$("printBtn").addEventListener("click", () => window.print());
+$("newBtn").addEventListener("click", () => {
+  form.reset();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+showFormulaHelp();
+</script>
+</body>
+</html>
