@@ -662,10 +662,15 @@ $("trainingProfile").addEventListener("change", updateTrainingProfileUI);
 
 // Os campos de cada modalidade aparecem somente quando ela é selecionada.
 function renderExerciseDetails() {
+  // Preserva os valores já digitados antes de reconstruir os cartões.
+  const previousValues = new Map();
+  document.querySelectorAll("#exerciseDetails [data-exercise][data-detail]").forEach(input => {
+    previousValues.set(input.dataset.exercise + "::" + input.dataset.detail, input.value);
+  });
   const selectedExercises = [...document.querySelectorAll('input[name="exercise"]:checked')].map(el => el.value);
   const container = $("exerciseDetails");
   container.replaceChildren();
-  selectedExercises.forEach((name, index) => {
+  selectedExercises.forEach((name) => {
     const card = document.createElement("div");
     card.className = "exercise-card";
     const heading = document.createElement("h3");
@@ -682,7 +687,7 @@ function renderExerciseDetails() {
     );
     fields.forEach(field => {
       const wrapper = document.createElement("div"); wrapper.className = "field";
-      const id = "exercise_" + index + "_" + field.suffix;
+      const id = "exercise_" + name.toLowerCase() + "_" + field.suffix;
       const label = document.createElement("label"); label.htmlFor = id; label.textContent = field.label;
       let input;
       if (field.type === "select") {
@@ -693,6 +698,8 @@ function renderExerciseDetails() {
         input = document.createElement("input"); input.type = "number"; input.min = "1"; input.max = "1440"; input.step = "1"; input.placeholder = "Ex.: 60";
       }
       input.id = id; input.dataset.exercise = name; input.dataset.detail = field.suffix;
+      const savedValue = previousValues.get(name + "::" + field.suffix);
+      if (savedValue !== undefined) input.value = savedValue;
       wrapper.append(label, input); grid.append(wrapper);
     });
     card.append(grid); container.append(card);
@@ -862,11 +869,13 @@ form.addEventListener("submit", (event) => {
     cunningham: "Cunningham (1980)",
     cunningham1991: "Cunningham (1991)"
   };
-  const formulaReason = formula === "cunningham1991"
-    ? "Como foi informado um perfil de treinamento estruturado/competitivo e há uma estimativa de massa livre de gordura disponível, foi possível utilizar Cunningham (1991). A adequação depende da qualidade da avaliação corporal e da semelhança entre o indivíduo e a população de referência; não é uma equação universalmente superior."
-    : isTrained
-      ? "Embora tenha sido informado treinamento estruturado/competitivo, não foi fornecida massa magra nem percentual de gordura para estimá-la. Por isso, foi utilizada Mifflin-St Jeor, que não depende de composição corporal. A escolha é uma estimativa inicial e deve ser avaliada pelo profissional."
-      : "Selecionada como estimativa inicial para adultos. Utiliza idade, sexo biológico, peso e altura e não exige avaliação de composição corporal.";
+  const formulaProfiles = {
+    mifflin: "Adultos de 19 a 78 anos; estudada em pessoas com peso normal e obesidade. Utiliza peso, altura, idade e sexo; não exige composição corporal.",
+    harris: "Equação histórica desenvolvida com adultos considerados saudáveis, predominantemente da população de referência da época. Há estudos de aplicação em diferentes pesos, inclusive obesidade, mas a precisão individual pode variar. Não exige composição corporal.",
+    cunningham: "Equação baseada em massa livre de gordura, derivada da reanálise de dados de adultos da amostra clássica de Harris-Benedict. É mais pertinente quando há medida confiável de massa livre de gordura; não foi originalmente desenvolvida exclusivamente para atletas.",
+    cunningham1991: "Equação proposta para adultos, a partir de estudos que relacionaram gasto energético de repouso e composição corporal em ampla faixa de peso. Depende de massa livre de gordura; em alguns grupos, como mulheres com obesidade, a massa gorda também pode contribuir para a estimativa."
+  };
+  const formulaReason = formulaProfiles[formula];
   const goalNames = {
     loss: "Perda de peso",
     maintain: "Manutenção de peso",
@@ -881,10 +890,10 @@ form.addEventListener("submit", (event) => {
   $("outImcClass").className = "result-unit pill " + imcPillClass(imc);
   $("outWater").textContent = fmt(waterMl / 1000, 2) + " L";
   $("outWaterMl").textContent = fmt(waterMl) + " ml por dia";
-  $("outFormula").textContent = "Equação indicada automaticamente: " + formulaNames[formula]
-    + "\\nPor que foi indicada: " + formulaReason
-    + (usesLean ? "\\nMassa livre de gordura estimada: " + fmt(leanMass, 1) + " kg" : "")
-    + "\\nCálculo: " + equationText(formula, sex, weight, height, age, leanMass) + " = " + fmt(tmb, 1) + " kcal";
+  $("outFormula").textContent = "Equação utilizada: " + formulaNames[formula]
+    + "\nPopulação e aplicação: " + formulaReason
+    + (usesLean ? "\nMassa livre de gordura utilizada: " + fmt(leanMass, 1) + " kg" : "")
+    + "\nCálculo: " + equationText(formula, sex, weight, height, age, leanMass) + " = " + fmt(tmb, 1) + " kcal";
   $("outActivity").textContent = CONFIG.fatoresAtividade[activity] + " · Fator " + fmtFactor(factor)
     + "\nGET = TMB × fator = " + fmt(tmb, 1) + " × " + fmtFactor(factor) + " = " + fmt(get, 1) + " kcal";
   $("outLoss").textContent = fmt(loss);
@@ -916,7 +925,7 @@ form.addEventListener("submit", (event) => {
   setDetail("IMC", fmt(imc, 2) + " kg/m² · " + imcClassification(imc));
   setDetail("Perfil de treinamento", $("trainingProfile").selectedOptions[0]?.textContent || "");
   setDetail("Equação indicada", formulaNames[formula]);
-  setDetail("Justificativa da equação", formulaReason);
+  setDetail("População e aplicação da equação", formulaReason);
   if ($("bodyFatMethod").value) setDetail("Método de avaliação corporal", $("bodyFatMethod").value);
   if ($("weightHistory").value) setDetail("Histórico recente de peso", $("weightHistory").value);
   if ($("weightChange").value.trim()) setDetail("Variação de peso informada", $("weightChange").value.trim() + " kg");
