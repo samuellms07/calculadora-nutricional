@@ -208,6 +208,11 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
 .exercise-card h3{margin:0 0 10px;font-size:1rem}
 .exercise-card .field{min-width:0}
 
+
+.formula-technical{display:block;font-size:.82rem;font-weight:600;opacity:.72;margin-top:3px}
+#formulaOptions .option label strong{display:block;line-height:1.3}
+#formulaOptions .option label span{line-height:1.45}
+
 </style>
 </head>
 <body>
@@ -304,26 +309,27 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
   </section>
 
   <section class="panel">
-    <h2 class="section-title"><span class="step">3</span> Fórmula para estimar a TMB<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-flask"/></svg></h2>
-    <div class="options">
+    <h2 class="section-title"><span class="step">3</span> Como estimamos seu metabolismo?<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-flask"/></svg></h2>
+    <p class="hint">O sistema sugere uma equação com base nos dados informados. Os nomes técnicos ficam disponíveis para conferência e ajuste pelo nutricionista.</p>
+    <div class="options" id="formulaOptions">
       <div class="option">
         <input type="radio" id="formulaMifflin" name="formula" value="mifflin" checked>
-        <label for="formulaMifflin"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg><strong>Mifflin-St Jeor</strong><span>Equação frequentemente utilizada em adultos, inclusive com sobrepeso e obesidade.</span></label>
+        <label for="formulaMifflin"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg><strong>Opção geral para adultos</strong><span></span><span class="formula-technical">Mifflin-St Jeor</span><span>Utiliza idade, sexo biológico, peso e altura. É uma opção inicial frequente para adultos, inclusive com sobrepeso e obesidade.</span></label>
       </div>
       <div class="option">
         <input type="radio" id="formulaHarris" name="formula" value="harris">
-        <label for="formulaHarris"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><strong>Harris-Benedict (original)</strong><span>Equação original, frequentemente utilizada em indivíduos saudáveis e eutróficos.</span></label>
+        <label for="formulaHarris"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-book"/></svg><strong>Referência clássica</strong><span></span><span class="formula-technical">Harris-Benedict (original)</span><span>Utiliza idade, sexo biológico, peso e altura. Pode apresentar limitações em alguns perfis.</span></label>
       </div>
       <div class="option">
         <input type="radio" id="formulaCunningham" name="formula" value="cunningham">
-        <label for="formulaCunningham"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg><strong>Cunningham</strong><span>Utiliza massa magra; pode ser considerada em pessoas atléticas e musculosas.</span></label>
+        <label for="formulaCunningham"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg><strong>Para perfis com maior massa muscular</strong><span></span><span class="formula-technical">Cunningham (1980)</span><span>Utiliza a massa livre de gordura. Exige avaliação de composição corporal confiável e compatibilidade com o perfil da pessoa.</span></label>
       </div>
       <div class="option">
         <input type="radio" id="formulaCunningham1991" name="formula" value="cunningham1991">
-        <label for="formulaCunningham1991"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg><strong>Cunningham (1991)</strong><span>Equação baseada na massa livre de gordura: 370 + 21,6 × MLG.</span></label>
+        <label for="formulaCunningham1991"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg><strong>Alternativa baseada na composição corporal</strong><span></span><span class="formula-technical">Equação de 1991 · 370 + 21,6 × MLG</span><span>Também utiliza a massa livre de gordura. A aplicação depende da qualidade da avaliação corporal e da adequação ao indivíduo.</span></label>
       </div>
     </div>
-    <div id="formulaHelp" class="notice">Sugestão automática: Mifflin-St Jeor. É a opção inicial para adultos em geral. A escolha pode ser alterada manualmente pelo profissional.</div>
+    <div id="formulaHelp" class="notice">O sistema apresenta uma sugestão inicial para adultos em geral e considera os dados preenchidos. A seleção e eventuais ajustes devem ser conferidos pelo nutricionista.</div>
   </section>
 
   <section class="panel">
@@ -630,7 +636,7 @@ function updateFormulaSuggestion() {
   const hasBasics = Number.isFinite(age) && age >= 18 && age <= 120 && sex && Number.isFinite(weight) && weight > 0 && Number.isFinite(height) && height > 0;
   const imc = hasBasics ? weight / Math.pow(height / 100, 2) : null;
   const text = hasBasics
-    ? "Sugestão automática: Mifflin-St Jeor, considerando os dados antropométricos informados" + (imc >= 25 ? " e a presença de sobrepeso/obesidade pelo IMC. " : ". ") + "A composição corporal e a frequência de treino, sozinhas, não comprovam que outra equação será mais precisa. Se for atleta, use julgamento profissional e considere equações validadas para uma população semelhante. Você pode alterar a seleção manualmente."
+    ? "Sugestão inicial para adultos em geral: Mifflin-St Jeor, considerando os dados antropométricos informados" + (imc >= 25 ? " e a presença de sobrepeso/obesidade pelo IMC. " : ". ") + "A composição corporal e a frequência de treino, sozinhas, não comprovam que outra equação será mais precisa. Se for atleta, use julgamento profissional e considere equações validadas para uma população semelhante. Você pode alterar a seleção manualmente."
     : "Sugestão inicial: Mifflin-St Jeor para adultos em geral. Preencha idade, sexo biológico, peso e altura para contextualizar a recomendação. A seleção pode ser alterada manualmente.";
   const box = $("formulaHelp");
   if (box && selected("formula") === "mifflin") box.textContent = text;
