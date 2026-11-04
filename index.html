@@ -18,6 +18,7 @@ header{background:linear-gradient(120deg,#172554,#1d4ed8);color:#fff;padding:34p
 .header-inner,main,.footer-inner{max-width:1100px;margin:0 auto}
 header h1{margin:0;font-size:clamp(1.65rem,4vw,2.25rem);letter-spacing:-.04em}
 header p{margin:7px 0 0;color:#dbeafe}
+.version{display:inline-block;margin-top:14px;padding:4px 10px;border:1px solid #93c5fd66;border-radius:999px;color:#dbeafe;font-size:.78rem}
 main{padding:28px 18px 48px}
 .panel{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:18px;box-shadow:0 5px 20px #0f172a08}
 .section-title{display:flex;align-items:center;gap:10px;margin:0 0 17px;font-size:1.12rem}
@@ -86,6 +87,8 @@ header::after{content:"";position:absolute;right:130px;bottom:-120px;width:210px
 header h1{display:flex;align-items:center;gap:14px}
 .logo{display:grid;place-items:center;width:50px;height:50px;border-radius:14px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);flex:none}
 .logo svg{width:28px;height:28px}
+.version{display:inline-flex;align-items:center;gap:7px}
+.version svg{width:15px;height:15px}
 
 .panel{border-top:4px solid var(--acc,#2563eb);transition:box-shadow .2s}
 .panel:hover{box-shadow:0 8px 26px #0f172a12}
@@ -182,9 +185,8 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
 }
 @media print{
   body{background:#fff;color:#111}
-  header{background:#fff;color:#111;padding:0 0 18px;border-bottom:2px solid #1d4ed8}
-  header p{color:#475569}
-  main{padding:18px 0}
+  header{display:none!important}
+  main{padding:0}
   .no-print,form,.actions,footer{display:none!important}
   #results:not(.hidden){display:block!important;margin:0}
   .panel,.result-card{box-shadow:none;break-inside:avoid;border-color:#cbd5e1}
@@ -242,6 +244,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
   <div class="header-inner">
     <h1><span class="logo"><svg class="s logo-i" aria-hidden="true" focusable="false"><use href="#i-calc"/></svg></span>Calculadora Nutricional</h1>
     <p>Estimativa de necessidades energéticas e hídricas</p>
+    <span class="version"><svg class="s vi" aria-hidden="true" focusable="false"><use href="#i-shield"/></svg>Versão 1.0 · Cálculos realizados no próprio navegador</span>
   </div>
 </header>
 
@@ -466,7 +469,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
       As equações preditivas apresentam erro individual. A estimativa pode variar aproximadamente ±250 kcal/dia ou mais, sem que isso represente um intervalo estatístico garantido. Os resultados não substituem avaliação nutricional individualizada.
     </div>
     <div class="actions no-print">
-      <button class="primary" type="button" id="printBtn"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-print"/></svg>Imprimir / Salvar PDF</button>
+      <button class="primary" type="button" id="printBtn"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-print"/></svg>Gerar PDF dos resultados</button>
       <button class="ghost" type="button" id="newBtn"><svg class="s bi" aria-hidden="true" focusable="false"><use href="#i-refresh"/></svg>Nova avaliação</button>
     </div>
   </div>
