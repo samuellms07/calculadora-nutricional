@@ -114,7 +114,7 @@ input.invalid,select.invalid{border-color:#dc2626!important;background:#fef2f2}
 input[value="mifflin"]+label{--oc:#2563eb;--ocs:#eaf1ff}
 input[value="harris"]+label{--oc:#d97706;--ocs:#fff6e5}
 input[value="cunningham"]+label{--oc:#0d9488;--ocs:#e6faf7}
-input[value="tinsley"]+label{--oc:#7c3aed;--ocs:#f3edff}
+input[value="cunningham1991"]+label{--oc:#7c3aed;--ocs:#f3edff}
 input[name="activity"][value="1.2"]+label{--oc:#64748b;--ocs:#f1f4f8}
 input[name="activity"][value="1.375"]+label{--oc:#16a34a;--ocs:#effbf3}
 input[name="activity"][value="1.55"]+label{--oc:#0891b2;--ocs:#e8f9fd}
@@ -201,6 +201,13 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
   .panel{border-top-width:3px}
   .option label:hover{box-shadow:none}
 }
+
+.check-option{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1px solid var(--line,#dbe3ee);border-radius:10px;background:var(--surface,#fff);font-size:.94rem;cursor:pointer}
+.check-option input{width:17px;height:17px;accent-color:var(--primary,#2563eb);flex:0 0 auto}
+.exercise-card{grid-column:1/-1;padding:14px;border:1px solid var(--line,#dbe3ee);border-radius:12px;background:var(--surface,#fff)}
+.exercise-card h3{margin:0 0 10px;font-size:1rem}
+.exercise-card .field{min-width:0}
+
 </style>
 </head>
 <body>
@@ -280,7 +287,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
 
   <section class="panel">
     <h2 class="section-title"><span class="step">2</span> Composição corporal<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg></h2>
-    <p class="hint" style="margin:0 0 14px">Esses dados são necessários para utilizar Cunningham ou Tinsley. Para Mifflin ou Harris-Benedict, são opcionais.</p>
+    <p class="hint" style="margin:0 0 14px">Esses dados são necessários para utilizar as equações de Cunningham. Para Mifflin ou Harris-Benedict, são opcionais.</p>
     <div class="grid">
       <div class="field">
         <label for="bodyFat"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-percent"/></svg>Percentual de gordura corporal (%)</label>
@@ -293,7 +300,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
         <p class="hint">Se informada, terá prioridade sobre a massa magra calculada.</p>
       </div>
     </div>
-    <div id="bodyCompHint" class="notice">Informe percentual de gordura ou massa magra somente se for utilizar Cunningham ou Tinsley.</div>
+    <div id="bodyCompHint" class="notice">Informe percentual de gordura ou massa magra somente se for utilizar uma equação baseada em massa livre de gordura.</div>
   </section>
 
   <section class="panel">
@@ -312,11 +319,11 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
         <label for="formulaCunningham"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg><strong>Cunningham</strong><span>Utiliza massa magra; pode ser considerada em pessoas atléticas e musculosas.</span></label>
       </div>
       <div class="option">
-        <input type="radio" id="formulaTinsley" name="formula" value="tinsley">
-        <label for="formulaTinsley"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg><strong>Tinsley</strong><span>Utiliza massa magra; requer dados de composição corporal.</span></label>
+        <input type="radio" id="formulaCunningham1991" name="formula" value="cunningham1991">
+        <label for="formulaCunningham1991"><svg class="s oi" aria-hidden="true" focusable="false"><use href="#i-bolt"/></svg><strong>Cunningham (1991)</strong><span>Equação baseada na massa livre de gordura: 370 + 21,6 × MLG.</span></label>
       </div>
     </div>
-    <div id="formulaHelp" class="notice">Mifflin-St Jeor: utiliza peso, altura, idade e sexo biológico.</div>
+    <div id="formulaHelp" class="notice">Sugestão automática: Mifflin-St Jeor. É a opção inicial para adultos em geral. A escolha pode ser alterada manualmente pelo profissional.</div>
   </section>
 
   <section class="panel">
@@ -355,28 +362,30 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
           <option>Trabalho com esforço físico</option>
         </select>
       </div>
-      <div class="field">
-        <label for="frequency"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-calendar"/></svg>Quantos dias por semana pratica exercícios?</label>
-        <select id="frequency">
-          <option value="">Selecione (opcional)</option>
-          <option>Não pratico</option>
-          <option>1 a 2 dias</option>
-          <option>3 a 4 dias</option>
-          <option>5 a 6 dias</option>
-          <option>Todos os dias</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="exercise"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg>Qual atividade pratica?</label>
-        <select id="exercise">
-          <option value="">Selecione (opcional)</option>
-          <option>Musculação</option><option>Caminhada</option><option>Corrida</option>
-          <option>Ciclismo</option><option>Natação</option><option>Esportes coletivos</option>
-          <option>Treinamento funcional</option><option>Outra atividade</option><option>Não pratico exercícios</option>
-        </select>
+      <div class="field" style="grid-column:1/-1">
+        <label><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-pulse"/></svg>Quais modalidades você pratica?</label>
+        <p class="hint">Selecione todas as modalidades realizadas. É possível informar os dados de cada uma separadamente.</p>
+        <div id="exerciseOptions" class="options" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px">
+          <label class="check-option"><input type="checkbox" name="exercise" value="Musculação"> Musculação</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Corrida"> Corrida</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Caminhada"> Caminhada</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Ciclismo"> Ciclismo</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Natação"> Natação</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Futebol"> Futebol</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Vôlei"> Vôlei</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Basquete"> Basquete</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="CrossFit"> CrossFit</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Treinamento funcional"> Treinamento funcional</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Lutas"> Lutas</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Dança"> Dança</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Pilates"> Pilates</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Yoga"> Yoga</label>
+          <label class="check-option"><input type="checkbox" name="exercise" value="Outra atividade"> Outra atividade</label>
+        </div>
+        <div id="exerciseDetails" class="grid" style="margin-top:14px"></div>
       </div>
     </div>
-    <p class="hint">As informações complementares ajudam a contextualizar a escolha. Não serão multiplicadas novamente pelo GET.</p>
+    <p class="hint">O fator de atividade continua sendo selecionado pelo profissional. As modalidades, frequência, duração e intensidade registradas servem para contextualizar essa escolha e não são somadas novamente ao GET.</p>
   </section>
 
   <section class="panel">
@@ -535,18 +544,94 @@ function fmtFactor(value) {
 function showFormulaHelp() {
   const formula = selected("formula");
   const help = {
-    mifflin: "Mifflin-St Jeor: utiliza peso, altura, idade e sexo biológico.",
-    harris: "Harris-Benedict original: utiliza peso, altura, idade e sexo biológico. Pode superestimar o gasto em pessoas com sobrepeso ou obesidade.",
-    cunningham: "Cunningham: TMB = 500 + (22 × massa magra). Informe massa magra diretamente ou percentual de gordura.",
-    tinsley: "Tinsley: TMB = 370 + (21,6 × massa magra). Informe massa magra diretamente ou percentual de gordura."
+    mifflin: "Mifflin-St Jeor: utiliza peso, altura, idade e sexo biológico. Foi selecionada como sugestão inicial para adultos em geral, inclusive pessoas com sobrepeso ou obesidade.",
+    harris: "Harris-Benedict (original): utiliza peso, altura, idade e sexo biológico. Pode superestimar o gasto em alguns perfis, especialmente em pessoas com obesidade.",
+    cunningham: "Cunningham (1980): TMB = 500 + (22 × massa livre de gordura). Requer composição corporal confiável.",
+    cunningham1991: "Cunningham (1991): TMB = 370 + (21,6 × massa livre de gordura). Requer composição corporal confiável. Não é automaticamente superior para pessoas que apenas praticam exercícios."
   };
-  $("formulaHelp").textContent = help[formula];
-  const needsLean = formula === "cunningham" || formula === "tinsley";
+  $("formulaHelp").textContent = help[formula] || help.mifflin;
+  const needsLean = formula === "cunningham" || formula === "cunningham1991";
   $("bodyCompHint").textContent = needsLean
-    ? "Para esta fórmula, informe a massa magra diretamente ou o percentual de gordura para que ela seja estimada."
+    ? "Para esta equação, informe a massa magra diretamente ou o percentual de gordura para estimar a massa livre de gordura. Prefira uma avaliação de composição corporal confiável."
     : "Percentual de gordura e massa magra são opcionais para a fórmula selecionada.";
 }
 document.querySelectorAll('input[name="formula"]').forEach(el => el.addEventListener("change", showFormulaHelp));
+// A sugestão é recalculada conforme os dados básicos são preenchidos. A composição corporal
+// ou a frequência de treino, isoladamente, não justificam trocar automaticamente a equação.
+["age", "sex", "weight", "height", "bodyFat", "leanMass", "activity"].forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener("change", updateFormulaSuggestion);
+  if (el && el.tagName === "INPUT") el.addEventListener("input", updateFormulaSuggestion);
+});
+
+const exerciseNames = ["Musculação", "Corrida", "Caminhada", "Ciclismo", "Natação", "Futebol", "Vôlei", "Basquete", "CrossFit", "Treinamento funcional", "Lutas", "Dança", "Pilates", "Yoga", "Outra atividade"];
+function renderExerciseDetails() {
+  const selectedExercises = [...document.querySelectorAll('input[name="exercise"]:checked')].map(el => el.value);
+  const container = $("exerciseDetails");
+  container.replaceChildren();
+  selectedExercises.forEach((name, index) => {
+    const card = document.createElement("div");
+    card.className = "exercise-card";
+    const heading = document.createElement("h3");
+    heading.textContent = name;
+    card.append(heading);
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    const fields = [
+      { suffix: "days", label: "Frequência (dias por semana)", type: "select", options: ["1", "2", "3", "4", "5", "6", "7"] },
+      { suffix: "minutes", label: "Duração média por sessão (minutos)", type: "number", placeholder: "Ex.: 60" },
+      { suffix: "intensity", label: "Intensidade", type: "select", options: ["Leve", "Moderada", "Intensa"] }
+    ];
+    fields.forEach(field => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "field";
+      const id = "exercise_" + index + "_" + field.suffix;
+      const label = document.createElement("label");
+      label.htmlFor = id;
+      label.textContent = field.label;
+      let input;
+      if (field.type === "select") {
+        input = document.createElement("select");
+        const blank = document.createElement("option");
+        blank.value = "";
+        blank.textContent = "Selecione";
+        input.append(blank);
+        field.options.forEach(value => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = field.suffix === "days" ? value + (value === "1" ? " dia" : " dias") : value;
+          input.append(option);
+        });
+      } else {
+        input = document.createElement("input");
+        input.type = "number";
+        input.min = "1";
+        input.max = "1440";
+        input.step = "1";
+        input.placeholder = field.placeholder;
+      }
+      input.id = id;
+      input.dataset.exercise = name;
+      input.dataset.detail = field.suffix;
+      wrapper.append(label, input);
+      grid.append(wrapper);
+    });
+    card.append(grid);
+    container.append(card);
+  });
+}
+document.querySelectorAll('input[name="exercise"]').forEach(el => el.addEventListener("change", renderExerciseDetails));
+function updateFormulaSuggestion() {
+  const age = numberValue("age"), weight = numberValue("weight"), height = numberValue("height");
+  const sex = $("sex").value;
+  const hasBasics = Number.isFinite(age) && age >= 18 && age <= 120 && sex && Number.isFinite(weight) && weight > 0 && Number.isFinite(height) && height > 0;
+  const imc = hasBasics ? weight / Math.pow(height / 100, 2) : null;
+  const text = hasBasics
+    ? "Sugestão automática: Mifflin-St Jeor, considerando os dados antropométricos informados" + (imc >= 25 ? " e a presença de sobrepeso/obesidade pelo IMC. " : ". ") + "A composição corporal e a frequência de treino, sozinhas, não comprovam que outra equação será mais precisa. Se for atleta, use julgamento profissional e considere equações validadas para uma população semelhante. Você pode alterar a seleção manualmente."
+    : "Sugestão inicial: Mifflin-St Jeor para adultos em geral. Preencha idade, sexo biológico, peso e altura para contextualizar a recomendação. A seleção pode ser alterada manualmente.";
+  const box = $("formulaHelp");
+  if (box && selected("formula") === "mifflin") box.textContent = text;
+}
 $("clinical").addEventListener("change", () => {
   $("clinicalNotice").classList.toggle("hidden", $("clinical").value === "none");
 });
@@ -563,7 +648,7 @@ function calculateTmb(formula, sex, weight, height, age, leanMass) {
       : 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
   }
   if (formula === "cunningham") return 500 + (22 * leanMass);
-  if (formula === "tinsley") return 370 + (21.6 * leanMass);
+  if (formula === "cunningham1991") return 370 + (21.6 * leanMass);
   throw new Error("Fórmula não reconhecida.");
 }
 
@@ -578,7 +663,8 @@ function equationText(formula, sex, weight, height, age, leanMass) {
       : `655,1 + (9,563 × ${W}) + (1,850 × ${H}) − (4,676 × ${A})`;
   }
   if (formula === "cunningham") return `500 + (22 × ${L})`;
-  return `370 + (21,6 × ${L})`;
+  if (formula === "cunningham1991") return `370 + (21,6 × ${L})`;
+  return "";
 }
 
 function imcClassification(imc) {
@@ -663,8 +749,8 @@ form.addEventListener("submit", (event) => {
     leanSource = "Estimativa pelo percentual de gordura";
   }
 
-  if ((formula === "cunningham" || formula === "tinsley") && leanMass === null && !bad.has("leanMass") && !bad.has("bodyFat")) {
-    fail("Para Cunningham ou Tinsley, informe a massa magra ou o percentual de gordura corporal.", "leanMass", "bodyFat");
+  if ((formula === "cunningham" || formula === "cunningham1991") && leanMass === null && !bad.has("leanMass") && !bad.has("bodyFat")) {
+    fail("Para as equações de Cunningham, informe a massa magra ou o percentual de gordura corporal.", "leanMass", "bodyFat");
   }
   if (errors.length) {
     $("formError").textContent = errors.join("\n");
@@ -688,13 +774,13 @@ form.addEventListener("submit", (event) => {
   const loss = get * (1 - CONFIG.deficitCalorico);
   const maintain = get;
   const gain = get * (1 + CONFIG.superavitCalorico);
-  const usesLean = formula === "cunningham" || formula === "tinsley";
+  const usesLean = formula === "cunningham" || formula === "cunningham1991";
 
   const formulaNames = {
     mifflin: "Mifflin-St Jeor",
     harris: "Harris-Benedict (original)",
-    cunningham: "Cunningham",
-    tinsley: "Tinsley"
+    cunningham: "Cunningham (1980)",
+    cunningham1991: "Cunningham (1991)"
   };
   const goalNames = {
     loss: "Perda de peso",
@@ -751,8 +837,15 @@ form.addEventListener("submit", (event) => {
   }
   if (waist !== null) setDetail("Circunferência abdominal", fmt(waist, 1) + " cm");
   if ($("work").value) setDetail("Rotina de trabalho", $("work").value);
-  if ($("frequency").value) setDetail("Frequência de exercícios", $("frequency").value);
-  if ($("exercise").value) setDetail("Atividade praticada", $("exercise").value);
+  const exerciseSummary = [...document.querySelectorAll('input[name="exercise"]:checked')].map(el => {
+    const name = el.value;
+    const index = exerciseNames.indexOf(name);
+    const days = document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="days"]`)?.value || "";
+    const minutes = document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="minutes"]`)?.value || "";
+    const intensity = document.querySelector(`[data-exercise="${CSS.escape(name)}"][data-detail="intensity"]`)?.value || "";
+    return name + (days || minutes || intensity ? ": " + [days ? days + " dia(s)/semana" : "", minutes ? minutes + " min/sessão" : "", intensity ? "intensidade " + intensity.toLowerCase() : ""].filter(Boolean).join(", ") : "");
+  });
+  if (exerciseSummary.length) setDetail("Modalidades praticadas", exerciseSummary.join(" | "));
   if ($("notes").value.trim()) setDetail("Observações", $("notes").value.trim());
 
   // Alerta: Harris-Benedict original tende a superestimar em IMC >= 30.
@@ -769,11 +862,12 @@ form.addEventListener("submit", (event) => {
 });
 
 form.addEventListener("reset", () => {
+  setTimeout(renderExerciseDetails, 0);
   $("formError").textContent = "";
   clearInvalid();
   results.classList.add("hidden");
   $("clinicalNotice").classList.add("hidden");
-  setTimeout(showFormulaHelp, 0);
+  setTimeout(() => { showFormulaHelp(); updateFormulaSuggestion(); }, 0);
 });
 $("printBtn").addEventListener("click", () => window.print());
 $("newBtn").addEventListener("click", () => {
@@ -782,6 +876,7 @@ $("newBtn").addEventListener("click", () => {
 });
 
 showFormulaHelp();
+updateFormulaSuggestion();
 </script>
 </body>
 </html>
