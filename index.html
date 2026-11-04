@@ -290,7 +290,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
 
   <section class="panel">
     <h2 class="section-title"><span class="step">2</span> Composição corporal<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg></h2>
-    <p class="hint" style="margin:0 0 14px">Informe a composição corporal quando disponível. Para pessoas treinadas ou atletas, o percentual de gordura é obrigatório para a seleção automática da equação baseada em massa livre de gordura.</p>
+    <p class="hint" style="margin:0 0 14px">Informe a composição corporal quando disponível. O percentual de gordura não é obrigatório por categoria de treinamento: ele será utilizado quando houver dados suficientes para aplicar uma equação baseada em massa livre de gordura.</p>
     <div class="grid">
       <div class="field">
         <label for="bodyFat"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-percent"/></svg>Percentual de gordura corporal (%)</label>
@@ -300,7 +300,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
       <div class="field">
         <label for="leanMass"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg>Massa magra (kg)</label>
         <input id="leanMass" type="text" inputmode="decimal" autocomplete="off" placeholder="Opcional">
-        <p class="hint">Se informada, terá prioridade sobre a massa magra calculada.</p>
+        <p class="hint">Se informada, será utilizada diretamente nas equações baseadas em massa livre de gordura.</p>
       </div>
     </div>
     <div class="field" style="margin-top:12px">
@@ -316,7 +316,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
       </select>
       <p class="hint">O método ajuda a interpretar a confiabilidade da estimativa de massa livre de gordura.</p>
     </div>
-    <div id="bodyCompHint" class="notice">A composição corporal será considerada na seleção automática quando o perfil informado justificar uma equação baseada em massa livre de gordura.</div>
+    <div id="bodyCompHint" class="notice">A composição corporal é opcional. Quando a equação selecionada depender da massa livre de gordura, o sistema poderá utilizar a massa magra informada diretamente ou estimá-la pelo percentual de gordura.</div>
   </section>
 
   <section class="panel">
@@ -325,15 +325,15 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
       <label for="trainingProfile">Como você descreve seu nível de treinamento? <span class="required">*</span></label>
       <select id="trainingProfile" required>
         <option value="">Selecione</option>
-        <option value="untrained">Não pratico treinamento regularmente</option>
-        <option value="recreational">Pratico exercícios regularmente, por lazer ou saúde</option>
-        <option value="trained">Sou uma pessoa treinada, com rotina estruturada de treinamento</option>
-        <option value="athlete">Sou atleta competitivo ou profissional</option>
+        <option value="untrained">Sem treinamento regular — não pratico exercícios ou pratico apenas ocasionalmente, sem rotina estruturada.</option>
+        <option value="recreational">Fisicamente ativo — pratico exercícios regularmente por saúde, lazer ou condicionamento, sem foco sistemático em desempenho.</option>
+        <option value="trained">Treinamento estruturado — mantenho rotina consistente e planejada, com progressão de cargas, volume ou intensidade.</option>
+        <option value="athlete">Atleta competitivo — participo de competições e sigo preparação física específica para desempenho esportivo.</option>
       </select>
-      <p class="hint">Considere pessoa treinada aquela que mantém rotina estruturada e regular de treinamento. Praticar exercícios ocasionalmente não caracteriza, por si só, esse perfil.</p>
+      <p class="hint">Classifique-se pelo planejamento, consistência e objetivo do treinamento. A frequência isolada não determina o nível de adaptação física.</p>
     </div>
     <div id="trainedBodyFatNotice" class="notice hidden" style="margin-top:12px">
-      Para pessoas treinadas ou atletas, informe obrigatoriamente o percentual de gordura corporal. O sistema utilizará esse dado, junto ao peso, para estimar a massa livre de gordura e avaliar a equação baseada em composição corporal.
+      Para perfis com treinamento estruturado ou participação competitiva, a composição corporal pode ajudar na estimativa. Informe percentual de gordura ou massa magra somente se esses dados estiverem disponíveis e forem obtidos por avaliação adequada. A ausência desses dados não impede o cálculo por uma equação que não dependa da massa livre de gordura.
     </div>
   </section>
 
@@ -413,16 +413,17 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
         <label for="weightHistory">Como esteve seu peso nos últimos 3 a 6 meses?</label>
         <select id="weightHistory">
           <option value="">Selecione</option>
-          <option value="Estável">Permaneceu estável</option>
-          <option value="Perda de peso">Perdi peso</option>
-          <option value="Ganho de peso">Ganhei peso</option>
-          <option value="Variações frequentes">Teve variações frequentes</option>
-          <option value="Não sei informar">Não sei informar</option>
+          <option value="Estável">Permaneceu relativamente estável</option>
+          <option value="Perda de peso">Apresentou perda de peso</option>
+          <option value="Ganho de peso">Apresentou ganho de peso</option>
+          <option value="Variações frequentes">Apresentou oscilações frequentes</option>
+          <option value="Não sei informar">Não sabe informar</option>
         </select>
       </div>
-      <div class="field">
-        <label for="weightChange">Quanto aproximadamente (kg)?</label>
-        <input id="weightChange" type="text" inputmode="decimal" autocomplete="off" placeholder="Opcional">
+      <div class="field hidden" id="weightChangeField">
+        <label for="weightChange">Qual foi a variação aproximada do peso (kg)?</label>
+        <input id="weightChange" type="number" min="0" step="0.1" inputmode="decimal" autocomplete="off" placeholder="Ex.: 4,5">
+        <small class="hint">Informe a quantidade aproximada de quilos perdidos, ganhos ou da oscilação.</small>
       </div>
     </div>
     <div class="field" style="margin-top:15px">
@@ -560,21 +561,64 @@ function updateTrainingProfileUI() {
   const profile = $("trainingProfile").value;
   const trained = profile === "trained" || profile === "athlete";
   $("trainedBodyFatNotice").classList.toggle("hidden", !trained);
-  $("bodyFat").required = trained;
-  $("bodyFat").placeholder = trained ? "Obrigatório para este perfil" : "Ex.: 18";
+  $("bodyFat").required = false;
+  $("bodyFat").placeholder = "Ex.: 18 (opcional)";
   $("bodyCompHint").textContent = trained
-    ? "Para este perfil, o percentual de gordura é obrigatório. O sistema estimará a massa livre de gordura a partir do peso e do percentual informado."
-    : "Se disponível, informe o percentual de gordura e o método de avaliação. Esses dados podem ajudar a interpretar a composição corporal.";
+    ? "Opcional. Se a equação baseada em massa livre de gordura for apropriada e houver composição corporal disponível, o sistema poderá utilizá-la."
+    : "Opcional. Pode ajudar a interpretar a composição corporal, mas não é necessário para Mifflin-St Jeor.";
 }
 $("trainingProfile").addEventListener("change", updateTrainingProfileUI);
-$("bodyFat").addEventListener("input", () => {
-  if ($("trainingProfile").value === "trained" || $("trainingProfile").value === "athlete") {
-    $("bodyFat").setCustomValidity("");
-  }
-});
+
+// Os campos de cada modalidade aparecem somente quando ela é selecionada.
+function renderExerciseDetails() {
+  const selectedExercises = [...document.querySelectorAll('input[name="exercise"]:checked')].map(el => el.value);
+  const container = $("exerciseDetails");
+  container.replaceChildren();
+  selectedExercises.forEach((name, index) => {
+    const card = document.createElement("div");
+    card.className = "exercise-card";
+    const heading = document.createElement("h3");
+    heading.textContent = name === "Cardio" ? "Exercício cardiovascular (cardio)" : "Musculação / treinamento de força";
+    card.append(heading);
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    const fields = [];
+    if (name === "Cardio") fields.push({suffix:"modality", label:"Modalidade principal", type:"select", options:["Caminhada","Corrida","Ciclismo","Natação","Elíptico","Remo","Dança","Esporte coletivo","Outra"]});
+    fields.push(
+      {suffix:"days", label:"Frequência semanal", type:"select", options:["1","2","3","4","5","6","7"]},
+      {suffix:"minutes", label:"Duração média por sessão (minutos)", type:"number"},
+      {suffix:"intensity", label:"Intensidade", type:"select", options:["Leve","Moderada","Vigorosa"]}
+    );
+    fields.forEach(field => {
+      const wrapper = document.createElement("div"); wrapper.className = "field";
+      const id = "exercise_" + index + "_" + field.suffix;
+      const label = document.createElement("label"); label.htmlFor = id; label.textContent = field.label;
+      let input;
+      if (field.type === "select") {
+        input = document.createElement("select");
+        const blank = document.createElement("option"); blank.value = ""; blank.textContent = "Selecione"; input.append(blank);
+        field.options.forEach(value => { const option = document.createElement("option"); option.value = value; option.textContent = field.suffix === "days" ? value + (value === "1" ? " dia/semana" : " dias/semana") : value; input.append(option); });
+      } else {
+        input = document.createElement("input"); input.type = "number"; input.min = "1"; input.max = "1440"; input.step = "1"; input.placeholder = "Ex.: 60";
+      }
+      input.id = id; input.dataset.exercise = name; input.dataset.detail = field.suffix;
+      wrapper.append(label, input); grid.append(wrapper);
+    });
+    card.append(grid); container.append(card);
+  });
+}
+document.querySelectorAll('input[name="exercise"]').forEach(el => el.addEventListener("change", renderExerciseDetails));
 $("clinical").addEventListener("change", () => {
   $("clinicalNotice").classList.toggle("hidden", $("clinical").value === "none");
 });
+function updateWeightChangeUI() {
+  const history = $("weightHistory").value;
+  const showChange = ["Perda de peso", "Ganho de peso", "Variações frequentes"].includes(history);
+  $("weightChangeField").classList.toggle("hidden", !showChange);
+  if (!showChange) $("weightChange").value = "";
+}
+$("weightHistory").addEventListener("change", updateWeightChangeUI);
+
 
 function calculateTmb(formula, sex, weight, height, age, leanMass) {
   if (formula === "mifflin") {
@@ -650,7 +694,7 @@ form.addEventListener("submit", (event) => {
   const sex = $("sex").value;
   const trainingProfile = $("trainingProfile").value;
   const isTrained = trainingProfile === "trained" || trainingProfile === "athlete";
-  const formula = isTrained ? "cunningham1991" : "mifflin";
+  let formula = "mifflin";
   const activity = selected("activity");
   const goal = selected("goal");
   const clinical = $("clinical").value;
@@ -666,7 +710,7 @@ form.addEventListener("submit", (event) => {
   }
   if (!sex) fail("Selecione o sexo biológico.", "sex");
   if (!trainingProfile) fail("Informe seu perfil de treinamento.", "trainingProfile");
-  if (isTrained && bodyFat === null) fail("Para pessoas treinadas ou atletas, informe o percentual de gordura corporal. Esse dado é necessário para estimar a massa livre de gordura e aplicar a equação indicada.", "bodyFat");
+
 
   if (weight === null || !Number.isFinite(weight) || weight <= 0 || weight > 500) fail("Informe um peso válido, maior que zero e até 500 kg.", "weight");
   if (height === null || !Number.isFinite(height) || height < 50 || height > 250) fail("Informe uma altura válida entre 50 e 250 cm.", "height");
@@ -694,12 +738,8 @@ form.addEventListener("submit", (event) => {
     leanSource = "Estimativa pelo percentual de gordura";
   }
 
-  if (isTrained && bodyFat !== null && Number.isFinite(bodyFat) && Number.isFinite(weight)) {
-    leanMass = weight * (1 - bodyFat / 100);
-    leanSource = "Estimativa pelo percentual de gordura informado";
-  }
-  if (isTrained && !leanMass && !bad.has("bodyFat")) {
-    fail("Não foi possível estimar a massa livre de gordura. Confira o percentual de gordura informado.", "bodyFat");
+  if (isTrained && leanMass !== null) {
+    formula = "cunningham1991";
   }
   if (errors.length) {
     $("formError").textContent = errors.join("\n");
@@ -731,9 +771,11 @@ form.addEventListener("submit", (event) => {
     cunningham: "Cunningham (1980)",
     cunningham1991: "Cunningham (1991)"
   };
-  const formulaReason = isTrained
-    ? "Selecionada porque você informou rotina estruturada de treinamento ou condição de atleta. O percentual de gordura informado foi utilizado para estimar a massa livre de gordura. A equação de Cunningham (1991) é baseada em composição corporal; o resultado depende da qualidade do método utilizado e não substitui a calorimetria indireta."
-    : "Selecionada como estimativa inicial para adultos que não se identificaram como pessoas treinadas ou atletas. Utiliza idade, sexo biológico, peso e altura.";
+  const formulaReason = formula === "cunningham1991"
+    ? "Como foi informado um perfil de treinamento estruturado/competitivo e há uma estimativa de massa livre de gordura disponível, foi possível utilizar Cunningham (1991). A adequação depende da qualidade da avaliação corporal e da semelhança entre o indivíduo e a população de referência; não é uma equação universalmente superior."
+    : isTrained
+      ? "Embora tenha sido informado treinamento estruturado/competitivo, não foi fornecida massa magra nem percentual de gordura para estimá-la. Por isso, foi utilizada Mifflin-St Jeor, que não depende de composição corporal. A escolha é uma estimativa inicial e deve ser avaliada pelo profissional."
+      : "Selecionada como estimativa inicial para adultos. Utiliza idade, sexo biológico, peso e altura e não exige avaliação de composição corporal.";
   const goalNames = {
     loss: "Perda de peso",
     maintain: "Manutenção de peso",
@@ -833,7 +875,7 @@ form.addEventListener("reset", () => {
   clearInvalid();
   results.classList.add("hidden");
   $("clinicalNotice").classList.add("hidden");
-  setTimeout(() => { showFormulaHelp(); updateFormulaSuggestion(); }, 0);
+  setTimeout(() => { updateTrainingProfileUI(); renderExerciseDetails(); updateWeightChangeUI(); }, 0);
 });
 $("printBtn").addEventListener("click", () => window.print());
 $("newBtn").addEventListener("click", () => {
@@ -841,8 +883,9 @@ $("newBtn").addEventListener("click", () => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
-showFormulaHelp();
-updateFormulaSuggestion();
+updateTrainingProfileUI();
+renderExerciseDetails();
+updateWeightChangeUI();
 </script>
 </body>
 </html>
