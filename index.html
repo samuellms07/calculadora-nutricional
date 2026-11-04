@@ -211,6 +211,90 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
 
 .formula-technical{display:block;font-size:.82rem;font-weight:600;opacity:.72;margin-top:3px}
 
+
+/* ===================== TEMA ESCURO PREMIUM ===================== */
+:root{
+  color-scheme:dark;
+  --blue:#8b7cff;--blue-dark:#7565ef;--blue-soft:#211d3b;
+  --ink:#f3f5fb;--muted:#a6b0c2;--line:#303b50;--bg:#090d16;
+  --green:#4ade80;--green-soft:#142b23;--amber:#fbbf24;--amber-soft:#302719;
+  --red:#f87171;--red-soft:#351d25;--white:#141b29;--radius:16px;
+  --surface:#141b29;--primary:#8b7cff;
+}
+html{background:#090d16}
+body{background:radial-gradient(ellipse at 50% -15%,#1c2540 0,#0d1320 42%,#090d16 78%) no-repeat,#090d16;color:#f3f5fb}
+header{background:linear-gradient(120deg,#080c15 0%,#151d31 58%,#29204a 120%);border-bottom:1px solid #303b50}
+header p{color:#b8c2d4}
+.logo{background:rgba(139,124,255,.16);border-color:rgba(167,153,255,.3);color:#c4baff}
+.panel{background:linear-gradient(145deg,#151d2c 0%,#111827 100%);border-color:#2c374b;box-shadow:0 12px 32px #0005}
+.panel:hover{box-shadow:0 14px 36px #0007}
+.step{background:var(--acc,#8b7cff);color:#fff;box-shadow:0 4px 14px #0006}
+.section-title .ico{background:#202a3c;color:#b9adff}
+label,.field-label{color:#e8ecf5}
+input,select,textarea{background:#0d1421;color:#f3f5fb;border-color:#3a465c}
+input::placeholder,textarea::placeholder{color:#78869d}
+input:focus,select:focus,textarea:focus{background:#111a2a;border-color:#9b8cff;outline:3px solid #8b7cff38}
+select option{background:#111827;color:#f3f5fb}
+.hint{color:#a6b0c2}
+.required{color:#fb7185}
+.option label{background:#111827;border-color:#344056}
+.option label strong{color:#f3f5fb}
+.option label span{color:#a6b0c2}
+.option label:hover{border-color:#8b7cff;box-shadow:0 5px 18px #0005}
+.option input:checked+label{background:#211d3b;border-color:#9b8cff}
+.option input:focus-visible+label{outline:3px solid #8b7cff66}
+.notice{background:#1b2740;color:#c7d5ff}
+.notice.warning{background:#302719;color:#fcd58a}
+.notice.danger{background:#351d25;color:#ffb4b4}
+.error:not(:empty){background:#351d25;border-color:#71313c;color:#ffb4b4}
+.primary{background:linear-gradient(135deg,#8b7cff,#6755dc);color:#fff;box-shadow:0 5px 18px #6655dc55}
+.primary:hover{background:linear-gradient(135deg,#a092ff,#7565ef)}
+.secondary{background:#283449;color:#e5eaf4;border:1px solid #3b4961}
+.secondary:hover{background:#34435c}
+.ghost{background:#171f30;color:#c4baff;border-color:#51468a}
+.ghost:hover{background:#211d3b}
+.result-card,.result-card.highlight{background:linear-gradient(180deg,#1c2940 0,#141b29 105px);border-color:#344158}
+.result-card .eyebrow{color:#aeb9cc}
+.result-card .ri{background:#26334a;color:var(--rc,#b9adff);box-shadow:none}
+.result-value{color:var(--rc,#c4baff)}
+.result-unit,.result-card p,.results-intro{color:#a6b0c2}
+.calorie-table{color:#e7ebf4}
+.calorie-table th,.calorie-table td{border-color:#303b50}
+.calorie-table th{color:#a6b0c2}
+.calorie-table tr.selected{background:#292348;color:#ddd6ff}
+.calorie-table tr#rowLoss.selected{background:#302719;color:#fcd58a}
+.calorie-table tr#rowMaintain.selected{background:#202a43;color:#c7d5ff}
+.calorie-table tr#rowGain.selected{background:#142b23;color:#a7f3c4}
+.calorie-table .tag{background:#202a3c}
+.detail{background:#1b2638;border-left-color:#7565ef}
+.detail small{color:#a6b0c2}
+.detail strong{color:#f3f5fb}
+#outGoal{color:#86efac!important}
+.pill.low{background:#493719;color:#fcd58a}
+.pill.ok{background:#153b2a;color:#a7f3c4}
+.pill.over{background:#49301d;color:#fdba74}
+.pill.ob{background:#49232b;color:#fda4af}
+.check-option,.exercise-card{background:#111a29;border-color:#344158;color:#e8ecf5}
+.check-option input{accent-color:#9b8cff}
+.exercise-card h3{color:#e8ecf5}
+footer{color:#9aa7bb}
+.footer-inner{border-color:#303b50}
+footer .fi{color:#a99bff}
+hr{border-color:#303b50}
+
+/* A impressão/PDF permanece clara, independentemente do tema da tela. */
+@media print{
+  :root{color-scheme:light;--ink:#172033;--muted:#64748b;--line:#cbd5e1;--bg:#fff;--white:#fff}
+  html,body{background:#fff!important;color:#111!important}
+  .panel,.result-card,.result-card.highlight,.detail,.check-option,.exercise-card{background:#fff!important;color:#111!important;box-shadow:none!important}
+  .panel,.result-card,.detail,.check-option,.exercise-card{border-color:#cbd5e1!important}
+  .result-card .eyebrow,.result-card p,.result-unit,.detail small,.results-intro{color:#475569!important}
+  .result-value{color:#172033!important}
+  .detail strong,.calorie-table{color:#111!important}
+  .calorie-table th,.calorie-table td{border-color:#cbd5e1!important}
+  .calorie-table tr.selected{background:#eff6ff!important;color:#1e40af!important}
+}
+
 </style>
 </head>
 <body>
@@ -290,12 +374,12 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
 
   <section class="panel">
     <h2 class="section-title"><span class="step">2</span> Composição corporal<svg class="s ico" aria-hidden="true" focusable="false"><use href="#i-scale"/></svg></h2>
-    <p class="hint" style="margin:0 0 14px">Informe a composição corporal quando disponível. O percentual de gordura não é obrigatório por categoria de treinamento: ele será utilizado quando houver dados suficientes para aplicar uma equação baseada em massa livre de gordura.</p>
+    <p class="hint" style="margin:0 0 14px">A massa magra é opcional. O percentual de gordura e o método de avaliação serão solicitados somente para quem participa de competições esportivas.</p>
     <div class="grid">
-      <div class="field">
+      <div class="field hidden" id="bodyFatField">
         <label for="bodyFat"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-percent"/></svg>Percentual de gordura corporal (%)</label>
-        <input id="bodyFat" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 18">
-        <p class="hint">Usado para estimar a massa magra.</p>
+        <input id="bodyFat" type="text" inputmode="decimal" autocomplete="off" placeholder="Ex.: 18 (opcional)">
+        <p class="hint">Se disponível, será usado para estimar a massa livre de gordura.</p>
       </div>
       <div class="field">
         <label for="leanMass"><svg class="s li" aria-hidden="true" focusable="false"><use href="#i-dumbbell"/></svg>Massa magra (kg)</label>
@@ -303,7 +387,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
         <p class="hint">Se informada, será utilizada diretamente nas equações baseadas em massa livre de gordura.</p>
       </div>
     </div>
-    <div class="field" style="margin-top:12px">
+    <div class="field hidden" id="bodyFatMethodField" style="margin-top:12px">
       <label for="bodyFatMethod">Como foi obtido o percentual de gordura?</label>
       <select id="bodyFatMethod">
         <option value="">Selecione, se souber</option>
@@ -316,7 +400,7 @@ footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#25
       </select>
       <p class="hint">O método ajuda a interpretar a confiabilidade da estimativa de massa livre de gordura.</p>
     </div>
-    <div id="bodyCompHint" class="notice">A composição corporal é opcional. Quando a equação selecionada depender da massa livre de gordura, o sistema poderá utilizar a massa magra informada diretamente ou estimá-la pelo percentual de gordura.</div>
+    <div id="bodyCompHint" class="notice">A massa magra informada poderá ser utilizada quando a equação selecionada depender da massa livre de gordura. O percentual de gordura será exibido somente para atletas competitivos.</div>
   </section>
 
   <section class="panel">
@@ -560,12 +644,19 @@ function fmtFactor(value) {
 function updateTrainingProfileUI() {
   const profile = $("trainingProfile").value;
   const trained = profile === "trained" || profile === "athlete";
+  const competing = profile === "athlete";
   $("trainedBodyFatNotice").classList.toggle("hidden", !trained);
+  $("bodyFatField").classList.toggle("hidden", !competing);
+  $("bodyFatMethodField").classList.toggle("hidden", !competing);
   $("bodyFat").required = false;
   $("bodyFat").placeholder = "Ex.: 18 (opcional)";
-  $("bodyCompHint").textContent = trained
-    ? "Opcional. Se a equação baseada em massa livre de gordura for apropriada e houver composição corporal disponível, o sistema poderá utilizá-la."
-    : "Opcional. Pode ajudar a interpretar a composição corporal, mas não é necessário para Mifflin-St Jeor.";
+  if (!competing) {
+    $("bodyFat").value = "";
+    $("bodyFatMethod").value = "";
+  }
+  $("bodyCompHint").textContent = competing
+    ? "Para atletas competitivos, o percentual de gordura pode ajudar a estimar a massa livre de gordura. Informe-o se houver uma avaliação disponível."
+    : "A massa magra informada diretamente permanece opcional. O percentual de gordura não é solicitado para este perfil.";
 }
 $("trainingProfile").addEventListener("change", updateTrainingProfileUI);
 
@@ -689,10 +780,10 @@ form.addEventListener("submit", (event) => {
   const weight = numberValue("weight");
   const height = numberValue("height");
   const waist = numberValue("waist");
-  const bodyFat = numberValue("bodyFat");
+  const trainingProfile = $("trainingProfile").value;
+  const bodyFat = trainingProfile === "athlete" ? numberValue("bodyFat") : null;
   const leanInput = numberValue("leanMass");
   const sex = $("sex").value;
-  const trainingProfile = $("trainingProfile").value;
   const isTrained = trainingProfile === "trained" || trainingProfile === "athlete";
   let formula = "mifflin";
   const activity = selected("activity");
@@ -832,7 +923,7 @@ form.addEventListener("submit", (event) => {
   setDetail("Nível de atividade", CONFIG.fatoresAtividade[activity]);
   setDetail("Fator aplicado", fmtFactor(factor));
   setDetail("Objetivo", goalNames[goal]);
-  if (bodyFat !== null) setDetail("Gordura corporal", fmt(bodyFat, 1) + "%");
+  if (trainingProfile === "athlete" && bodyFat !== null) setDetail("Gordura corporal", fmt(bodyFat, 1) + "%");
   if (leanMass !== null) {
     setDetail("Massa magra", fmt(leanMass, 1) + " kg (" + leanSource + (usesLean ? "" : "; não usada na fórmula escolhida") + ")");
   }
