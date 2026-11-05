@@ -597,8 +597,8 @@ hr{border-color:#e3e8f0}
 
 <div id="leadModal" class="lead-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
   <div class="lead-dialog">
-    <h2 id="leadTitle">Antes de gerar seu PDF</h2>
-    <p>Informe seus dados para concluir a geração do documento. O contato comercial é opcional.</p>
+    <h2 id="leadTitle">Antes de visualizar seus resultados</h2>
+    <p>Informe seu nome e WhatsApp para continuar para o cálculo. A autorização para receber contato comercial é opcional.</p>
     <form id="leadForm" novalidate>
       <div class="field">
         <label for="leadName">Nome completo <span class="required">*</span></label>
@@ -615,7 +615,7 @@ hr{border-color:#e3e8f0}
       <p class="hint">Se não marcar a autorização, seus dados serão utilizados apenas para registrar a solicitação do PDF. Não enviaremos à planilha informações clínicas ou resultados da avaliação.</p>
       <div id="leadError" class="error" role="alert" aria-live="polite"></div>
       <div class="actions">
-        <button class="primary" id="leadSubmit" type="submit">Continuar e gerar PDF</button>
+        <button class="primary" id="leadSubmit" type="submit">Continuar para os resultados</button>
         <button class="secondary" id="leadCancel" type="button">Cancelar</button>
       </div>
       <div id="leadStatus" class="lead-status" aria-live="polite"></div>
@@ -626,7 +626,7 @@ hr{border-color:#e3e8f0}
 
 <footer>
   <div class="footer-inner">
-    <svg class="s fi" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><strong>Privacidade:</strong> os cálculos são realizados nesta página. Ao solicitar o PDF, nome e telefone são enviados ao Google Sheets para registro. A autorização para receber contato comercial é opcional. Dados clínicos e resultados não são enviados à planilha.
+    <svg class="s fi" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><strong>Privacidade:</strong> os cálculos são realizados nesta página. Ao continuar para os resultados, nome e telefone são enviados ao Google Sheets para registro. A autorização para receber contato comercial é opcional. Dados clínicos e resultados não são enviados à planilha.
     <p class="disclaimer">Esta calculadora utiliza equações preditivas para estimar necessidades energéticas e hídricas. Os resultados são aproximados e não substituem uma avaliação nutricional individualizada. As necessidades podem variar conforme composição corporal, condições clínicas, rotina, nível de atividade física e outros fatores individuais. Os resultados não constituem diagnóstico ou prescrição nutricional.</p>
   </div>
 </footer>
@@ -895,6 +895,17 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
+  // Solicita nome e WhatsApp antes de apresentar os resultados.
+  // Após o registro, o formulário é reenviado uma única vez para concluir o cálculo.
+  if (!leadCapturedForCalculation) {
+    $("leadError").textContent = "";
+    $("leadStatus").textContent = "";
+    leadModal.classList.remove("hidden");
+    setTimeout(() => $("leadName").focus(), 50);
+    return;
+  }
+  leadCapturedForCalculation = false;
+
   const factor = Number(activity);
   const get = tmb * factor;
   const imc = weight / Math.pow(height / 100, 2);
@@ -1019,16 +1030,12 @@ form.addEventListener("reset", () => {
   setTimeout(() => { updateTrainingProfileUI(); renderExerciseDetails(); updateWeightChangeUI(); }, 0);
 });
 const LEADS_ENDPOINT = "https://script.google.com/macros/s/AKfycbwzbhtra8TnalSucGJAAe-g107crsy3IaKi2_UdYGO5u6i0JwIJYhoaN1mXGiPyo8s/exec";
+let leadCapturedForCalculation = false;
 const leadModal = $("leadModal");
 const leadForm = $("leadForm");
 const leadPhone = $("leadPhone");
 
-$("printBtn").addEventListener("click", () => {
-  $("leadError").textContent = "";
-  $("leadStatus").textContent = "";
-  leadModal.classList.remove("hidden");
-  setTimeout(() => $("leadName").focus(), 50);
-});
+$("printBtn").addEventListener("click", () => window.print());
 
 $("leadCancel").addEventListener("click", () => leadModal.classList.add("hidden"));
 leadModal.addEventListener("click", (event) => {
@@ -1059,12 +1066,13 @@ leadForm.addEventListener("submit", async (event) => {
     // O modo no-cors evita bloqueio de CORS do Apps Script. A resposta não é legível pelo navegador.
     await fetch(LEADS_ENDPOINT, { method: "POST", mode: "no-cors", body: payload });
     leadModal.classList.add("hidden");
-    window.print();
+    leadCapturedForCalculation = true;
+    form.requestSubmit();
   } catch (err) {
     error.textContent = "Não foi possível enviar os dados. Verifique sua conexão e tente novamente.";
   } finally {
     submit.disabled = false;
-    submit.textContent = "Continuar e gerar PDF";
+    submit.textContent = "Continuar para os resultados";
   }
 });
 $("newBtn").addEventListener("click", () => {
