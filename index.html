@@ -172,6 +172,19 @@ button .bi{width:18px;height:18px}
 .detail{border-left:3px solid #bfdbfe}
 #outGoal{color:#166534!important}
 footer .fi{width:16px;height:16px;vertical-align:-3px;margin-right:6px;color:#2563eb}
+
+/* Captação de contato antes da geração do PDF */
+.lead-overlay{position:fixed;inset:0;background:rgba(15,23,42,.62);display:grid;place-items:center;padding:18px;z-index:9999}
+.lead-dialog{width:min(100%,480px);background:#fff;border-radius:18px;padding:25px;box-shadow:0 24px 70px #0f172a55;max-height:calc(100vh - 36px);overflow:auto}
+.lead-dialog h2{margin:0 0 6px;font-size:1.35rem;color:#172033}
+.lead-dialog>p{margin:0 0 18px;color:#64748b;font-size:.9rem}
+.lead-dialog .field{margin:13px 0}
+.lead-consent{display:flex;align-items:flex-start;gap:10px;font-size:.84rem;color:#475569;margin-top:15px}
+.lead-consent input{width:18px;min-height:18px;margin:2px 0 0;flex:none}
+.lead-dialog .actions{margin-top:18px}
+.lead-status{font-size:.82rem;color:#64748b;min-height:1.2em;margin-top:8px}
+@media print{.lead-overlay{display:none!important}}
+
 @media(max-width:700px){
   header{padding:27px 18px}
   main{padding:18px 12px 35px}
@@ -295,22 +308,6 @@ hr{border-color:#e3e8f0}
   .calorie-table tr.selected{background:#eff6ff!important;color:#1e40af!important}
 }
 
-
-/* Captação de contato antes da geração do PDF */
-.lead-modal{position:fixed;inset:0;z-index:9999;background:rgba(15,23,42,.58);display:flex;align-items:center;justify-content:center;padding:18px}
-.lead-modal.hidden{display:none!important}
-.lead-dialog{width:min(100%,480px);background:#fff;border:1px solid #dbe3ee;border-radius:18px;padding:24px;box-shadow:0 24px 70px rgba(15,23,42,.28);color:#172033}
-.lead-dialog h2{margin:0 0 8px;font-size:1.35rem;color:#172033}
-.lead-dialog p{color:#596579;line-height:1.5;margin:0 0 16px;font-size:.94rem}
-.lead-dialog .field{margin:13px 0}
-.lead-dialog label{display:block;font-weight:650;margin-bottom:6px}
-.lead-dialog input[type=text],.lead-dialog input[type=tel]{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;background:#fff;color:#172033}
-.lead-consent{display:flex;gap:10px;align-items:flex-start;font-size:.9rem;line-height:1.45;color:#334155;margin:16px 0}
-.lead-consent input{margin-top:3px;accent-color:#2563eb}
-.lead-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
-.lead-error{color:#b91c1c;font-size:.88rem;min-height:1.2em;margin-top:8px}
-.lead-privacy{font-size:.78rem!important;color:#64748b!important;margin-top:12px!important}
-@media(max-width:520px){.lead-dialog{padding:19px}.lead-actions button{flex:1}}
 </style>
 </head>
 <body>
@@ -597,36 +594,45 @@ hr{border-color:#e3e8f0}
     </div>
   </div>
 </section>
+
+<div id="leadModal" class="lead-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
+  <div class="lead-dialog">
+    <h2 id="leadTitle">Antes de gerar seu PDF</h2>
+    <p>Informe seus dados para concluir a geração do documento. O contato comercial é opcional.</p>
+    <form id="leadForm" novalidate>
+      <div class="field">
+        <label for="leadName">Nome completo <span class="required">*</span></label>
+        <input id="leadName" name="nome" type="text" maxlength="120" autocomplete="name" required placeholder="Seu nome completo">
+      </div>
+      <div class="field">
+        <label for="leadPhone">Telefone / WhatsApp <span class="required">*</span></label>
+        <input id="leadPhone" name="telefone" type="tel" maxlength="25" inputmode="tel" autocomplete="tel" required placeholder="(00) 00000-0000">
+      </div>
+      <label class="lead-consent">
+        <input id="leadConsent" type="checkbox" name="autorizacao_contato" value="Sim">
+        <span>Autorizo receber contato por telefone ou WhatsApp para conhecer planos alimentares e serviços nutricionais. Posso retirar esta autorização a qualquer momento.</span>
+      </label>
+      <p class="hint">Se não marcar a autorização, seus dados serão utilizados apenas para registrar a solicitação do PDF. Não enviaremos à planilha informações clínicas ou resultados da avaliação.</p>
+      <div id="leadError" class="error" role="alert" aria-live="polite"></div>
+      <div class="actions">
+        <button class="primary" id="leadSubmit" type="submit">Continuar e gerar PDF</button>
+        <button class="secondary" id="leadCancel" type="button">Cancelar</button>
+      </div>
+      <div id="leadStatus" class="lead-status" aria-live="polite"></div>
+    </form>
+  </div>
+</div>
 </main>
 
 <footer>
   <div class="footer-inner">
-    <svg class="s fi" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><strong>Privacidade:</strong> os dados clínicos e antropométricos permanecem no navegador e não são enviados. Ao solicitar o PDF, nome e telefone são enviados à base de contatos somente para registro; a autorização para receber ofertas de planos alimentares é opcional.
+    <svg class="s fi" aria-hidden="true" focusable="false"><use href="#i-lock"/></svg><strong>Privacidade:</strong> os cálculos são realizados nesta página. Ao solicitar o PDF, nome e telefone são enviados ao Google Sheets para registro. A autorização para receber contato comercial é opcional. Dados clínicos e resultados não são enviados à planilha.
     <p class="disclaimer">Esta calculadora utiliza equações preditivas para estimar necessidades energéticas e hídricas. Os resultados são aproximados e não substituem uma avaliação nutricional individualizada. As necessidades podem variar conforme composição corporal, condições clínicas, rotina, nível de atividade física e outros fatores individuais. Os resultados não constituem diagnóstico ou prescrição nutricional.</p>
   </div>
 </footer>
 
-
-<div id="leadModal" class="lead-modal hidden" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
-  <div class="lead-dialog">
-    <h2 id="leadTitle">Antes de gerar seu PDF</h2>
-    <p>Informe seus dados de contato. Eles serão registrados para identificação da solicitação. Você decide separadamente se autoriza receber contato sobre planos alimentares.</p>
-    <form id="leadForm">
-      <div class="field"><label for="leadName">Nome completo</label><input id="leadName" name="nome" type="text" autocomplete="name" maxlength="120" required placeholder="Seu nome"></div>
-      <div class="field"><label for="leadPhone">Telefone / WhatsApp</label><input id="leadPhone" name="telefone" type="tel" autocomplete="tel" inputmode="tel" maxlength="25" required placeholder="(00) 00000-0000"></div>
-      <label class="lead-consent"><input id="leadConsent" type="checkbox"><span>Autorizo receber contato por telefone ou WhatsApp para conhecer planos alimentares e serviços nutricionais. Posso retirar essa autorização quando quiser.</span></label>
-      <div id="leadError" class="lead-error" role="alert" aria-live="polite"></div>
-      <div class="lead-actions"><button type="button" class="secondary" id="leadCancel">Cancelar</button><button type="submit" class="primary" id="leadContinue">Salvar e gerar PDF</button></div>
-      <p class="lead-privacy">Não enviamos peso, medidas, condições clínicas, resultados ou outras informações de saúde para a planilha. O consentimento comercial não é obrigatório para gerar o PDF.</p>
-    </form>
-  </div>
-</div>
-
 <script>
 "use strict";
-
-// Cole aqui a URL do aplicativo da Web do Google Apps Script após implantá-lo.
-const LEADS_ENDPOINT = "COLE_AQUI_A_URL_DO_APPS_SCRIPT";
 
 // Parâmetros centralizados para facilitar futuras alterações.
 const CONFIG = {
@@ -1012,38 +1018,53 @@ form.addEventListener("reset", () => {
   $("clinicalNotice").classList.add("hidden");
   setTimeout(() => { updateTrainingProfileUI(); renderExerciseDetails(); updateWeightChangeUI(); }, 0);
 });
+const LEADS_ENDPOINT = "https://script.google.com/macros/s/AKfycbwzbhtra8TnalSucGJAAe-g107crsy3IaKi2_UdYGO5u6i0JwIJYhoaN1mXGiPyo8s/exec";
 const leadModal = $("leadModal");
+const leadForm = $("leadForm");
+const leadPhone = $("leadPhone");
+
 $("printBtn").addEventListener("click", () => {
   $("leadError").textContent = "";
+  $("leadStatus").textContent = "";
   leadModal.classList.remove("hidden");
-  $("leadName").focus();
+  setTimeout(() => $("leadName").focus(), 50);
 });
+
 $("leadCancel").addEventListener("click", () => leadModal.classList.add("hidden"));
-leadModal.addEventListener("click", (event) => { if (event.target === leadModal) leadModal.classList.add("hidden"); });
-$("leadForm").addEventListener("submit", async (event) => {
+leadModal.addEventListener("click", (event) => {
+  if (event.target === leadModal) leadModal.classList.add("hidden");
+});
+leadPhone.addEventListener("input", () => {
+  // Mantém a digitação livre; a validação considera apenas os dígitos.
+  leadPhone.setCustomValidity("");
+});
+leadForm.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const name = $("leadName").value.trim();
-  const phone = $("leadPhone").value.trim();
-  const consent = $("leadConsent").checked;
-  const digits = phone.replace(/\D/g, "");
-  if (name.length < 2) { $("leadError").textContent = "Informe seu nome completo."; return; }
-  if (digits.length < 10 || digits.length > 13) { $("leadError").textContent = "Informe um telefone válido com DDD."; return; }
-  if (!LEADS_ENDPOINT.startsWith("https://script.google.com/macros/s/")) {
-    $("leadError").textContent = "A integração ainda precisa ser configurada com a URL do Google Apps Script.";
-    return;
-  }
-  const button = $("leadContinue");
-  button.disabled = true; button.textContent = "Registrando...";
-  const payload = new URLSearchParams({ nome: name, telefone: phone, autorizacao_contato: consent ? "Sim" : "Não", origem: "Calculadora Nutricional", data_hora: new Date().toISOString() });
+  const nome = $("leadName").value.trim();
+  const telefone = leadPhone.value.trim();
+  const digits = telefone.replace(/\D/g, "");
+  const error = $("leadError");
+  const submit = $("leadSubmit");
+  error.textContent = "";
+  if (nome.length < 2) { error.textContent = "Informe seu nome completo."; $("leadName").focus(); return; }
+  if (digits.length < 10 || digits.length > 13) { error.textContent = "Informe um telefone válido com DDD."; leadPhone.focus(); return; }
+  submit.disabled = true;
+  submit.textContent = "Registrando dados…";
   try {
-    // Requisição simples em modo no-cors: o navegador não expõe a resposta, mas envia os campos ao Apps Script.
+    const payload = new URLSearchParams();
+    payload.set("nome", nome);
+    payload.set("telefone", telefone);
+    payload.set("autorizacao_contato", $("leadConsent").checked ? "Sim" : "Não");
+    payload.set("origem", "Calculadora Nutricional");
+    // O modo no-cors evita bloqueio de CORS do Apps Script. A resposta não é legível pelo navegador.
     await fetch(LEADS_ENDPOINT, { method: "POST", mode: "no-cors", body: payload });
     leadModal.classList.add("hidden");
     window.print();
-  } catch (error) {
-    $("leadError").textContent = "Não foi possível enviar os dados. Verifique sua conexão e tente novamente.";
+  } catch (err) {
+    error.textContent = "Não foi possível enviar os dados. Verifique sua conexão e tente novamente.";
   } finally {
-    button.disabled = false; button.textContent = "Salvar e gerar PDF";
+    submit.disabled = false;
+    submit.textContent = "Continuar e gerar PDF";
   }
 });
 $("newBtn").addEventListener("click", () => {
